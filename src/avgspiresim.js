@@ -312,7 +312,7 @@ export const avgCalc = {
 		let pager = $($('#avgCalcPager').children('div').get(0));
 		let max = 4;
 		if(avgCalc.pages == 0){
-			pager.append($(`<a data-val="i" class="clickable"><svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="/icons/icons.svg#info-square-fill"/></svg></a>`)
+			pager.append($(`<a data-val="i" class="clickable"><svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="./icons/icons.svg#info-square-fill"/></svg></a>`)
 				.on('click', (e)=>{ avgCalc.showSim('i'); }));
 			pager.append($(`<a id="addSimTab" class="clickable">&nbsp;+&nbsp;</a>`)
 				.on('click', (e)=>{ if( avgCalc.addSim() ) avgCalc.showSim(avgCalc.pages - 1); }));
@@ -322,7 +322,7 @@ export const avgCalc = {
 			if(avgCalc.pages == (max - 1)){
 				adder.hide();
 			}
-			adder.before($(`<a data-val="${avgCalc.pages}" class="clickable"><svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="/icons/icons.svg#bar-chart-fill"/></svg></a>`)
+			adder.before($(`<a data-val="${avgCalc.pages}" class="clickable"><svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="./icons/icons.svg#bar-chart-fill"/></svg></a>`)
 				.on('click', (e)=>{ if(e.target?.dataset?.val >= 0) avgCalc.showSim(parseInt(e.target.dataset.val)); }));
 				
 			

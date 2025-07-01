@@ -90,12 +90,12 @@ export const mathVisualStyles = [
 
 export const infoTableVisibilityOptions = [
 	{
-		short: '<svg class="bi" width="1em" height="1em" fill="currentColor"><use xlink:href="/icons/icons.svg#info-square-fill"/></svg>',
+		short: '<svg class="bi" width="1em" height="1em" fill="currentColor"><use xlink:href="./icons/icons.svg#info-square-fill"/></svg>',
 		full: 'Display effectiveness summary table',
 		val: true
 	},
 	{
-		short: '<svg class="bi" width="1em" height="1em" fill="currentColor"><use xlink:href="/icons/icons.svg#info-square-fill"/></svg>',
+		short: '<svg class="bi" width="1em" height="1em" fill="currentColor"><use xlink:href="./icons/icons.svg#info-square-fill"/></svg>',
 		full: 'Hide effectiveness summary table',
 		val: false
 	},
@@ -103,12 +103,12 @@ export const infoTableVisibilityOptions = [
 
 export const pagerVisibilityOptions = [
 	{
-		short: '<svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="/icons/icons.svg#eye"/></svg>',
+		short: '<svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="./icons/icons.svg#eye"/></svg>',
 		full: 'Display mech lists',
 		val: true
 	},
 	{
-		short: '<svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="/icons/icons.svg#eye-slash"/></svg>',
+		short: '<svg class="bi" width="1.1em" height="1.1em" fill="currentColor"><use xlink:href="./icons/icons.svg#eye-slash"/></svg>',
 		full: 'Hide mech lists',
 		val: false
 	},
