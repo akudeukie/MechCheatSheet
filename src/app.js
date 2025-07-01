@@ -13,7 +13,7 @@ export const app = {
 	LS_MechBucket: 'mechBucket_',
 	LS_PageLabels: 'storedLabels',
 	LS_Heap: 'storedRandomStuff',
-	info: ['Mech Cheat Sheet', 'by Akudeu Kie', 'http://', 'for %0 v%1 %2', 'https://pmotschmann.github.io/Evolve/', 'Evolve Incremental', '1.4.8', 'by Demagorddon'],
+	info: ['Mech Cheat Sheet', 'by Akudeu Kie', 'https://github.com/akudeukie/MechCheatSheet/', 'for %0 v%1 %2', 'https://pmotschmann.github.io/Evolve/', 'Evolve Incremental', '1.4.8', 'by Demagorddon'],
 	maxMechBuckets: 4,
 	maxStatus: 4,
 	maxMechPages: 15,
