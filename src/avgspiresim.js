@@ -268,7 +268,7 @@ export const avgCalc = {
 				avgCalc.summarizer.clear();
 				break;
 			default:
-				console.log(e.data);
+				//console.log(e.data);
 				break;
 		}
 	},

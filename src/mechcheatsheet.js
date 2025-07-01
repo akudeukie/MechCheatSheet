@@ -552,7 +552,7 @@ export function inform(type, info, id, actions = []){
 			timeout = 2000;
 			break;
 		default:
-			console.log(type + info);
+			//console.log(type + info);
 			return;
 	}
 	
