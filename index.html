@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Evolve Mech Cheat Sheet</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link type="text/css" rel="stylesheet" href="/style.css" />
+	
+	<script type="text/javascript" src="./lib/jquery-3.7.1.min.js"></script>
+	<script type="text/javascript" src="./lib/lz-string/lz-string.min.js"></script>
+	<!-- <script type="module" src="./src/mechcheatsheet.js"></script> -->
+	<script type="module" src="./lib/mechcheatsheet.js"></script>
+	
+	<link rel="icon" type="image/x-icon" href="/icons/calculator.svg" />
+	
+	<style type="text/css">
+		body {
+			font-size: 1.5em;
+		}
+		
+		input, button, .spanImpostor, .spanContainer .spanBlock span {
+			line-height: 1.2em;
+		}
+		
+		.spanLabel {
+			font-size: 0.7em;
+		}
+		
+		.smaller {
+			font-size: 0.7em;
+		}
+		
+		.smaller .spanLabel {
+			font-size: 0.9em;
+		}
+		
+		.spanLabel {
+			line-height: 1.5rem;
+		}
+		#mechListHeader .line,
+		/*#mechConstructor .line,*/
+		#mechLists .mcLn {
+			grid-template-columns: 12em 5em 5em 5em 4.5em auto;
+		}
+		#mechLists .mcLn.delimiter {
+			grid-template-columns: 24em auto;
+		}
+		#avgCalculator .line {
+			grid-template-columns: 48.5rem auto;
+			grid-gap: 0.4rem;
+		}
+		.avgSummary {
+			grid-template-columns: 12em auto;
+			grid-gap: 0.4rem;
+		}
+		@media (max-width: 960px) {
+			#avgCalculator .line {
+				grid-template-columns: auto auto;
+			}
+			#avgCalculator canvas {
+				width: 100%;
+			}
+		}
+		#mechLists .line {
+			line-height: 1.25rem;
+		}
+		
+		#titleCard .line {
+			grid-template-columns: 3fr 4fr;
+			column-gap: 0.5rem;
+		}
+		#titleCard .co0.rw0 {
+			font-size: 2rem;
+			grid-area: 1/1/span 2/1;
+			align-self: center;
+		}
+		
+		.dropdownContent.numberGrid.show {
+			grid-template-columns: repeat(5, 1fr);
+		}
+		
+		.numberGrid .fullSpan {
+			grid-column-end: span 5;
+			grid-column-start: 1;
+		}
+	
+	</style>
+</head>
+<body>
+	<section>
+		<div class="helpOverlay">Save string import section</div>
+		<div class="lineContainer" id="titleCard">
+			<div class="line" >
+				<div class="co0 rw0">
+					<span>Me</span>ch<span>Ch</span>eat<span>S</span>heet
+				</div>
+				<div class="co1 rw0">by Akudeu Kie | <a href="https://pmotschmann.github.io/Evolve/" target="_blank">GitHub</a></div>
+				<div class="co1 rw1">for <a href="https://pmotschmann.github.io/Evolve/" target="_blank">Evolve Incremental</a> v1.4.8 by Demagorddon<br/></div>
+				<input class="co0 rw2" type="textarea" id="saveString" placeholder="Save String"/>
+				<button class="action co1 rw2" id="parseSaveString" data-locale-string="wiki_calc_import">Import From Game</button>
+			</div>
+		</div>
+		<div id="localeBox">
+			<button id="localeButton" name="localeButton" value="" class="spanImpostor dropdownButton" title="Language">&#x1F30D;</button>
+			<div class="dropdownContent">
+				
+			</div>
+		</div>
+		<div id="bottomFloater">
+			<button id="goToTop" name="goToTop" value="" class="spanImpostor action" title="Scroll to top of the page">&#x1F845;</button>
+		</div>
+	</section>
+	<section>
+		<div class="helpOverlay">Floor controls</div>
+		<div class="spanContainer">
+			<div class="spanBlock">
+				<span class="spanLabel" data-locale-string="wiki_hell_hazard_para3_note">Floor number</span>
+				<span>
+					<input id="spireCount" type="number" value="" min="1"></input>
+				</span>
+			</div>
+			<div class="spanBlock initial">
+				<span class="spanLabel" data-locale-string="governor_criminal_t1">Boss</span>
+				<button id="spireBoss" name="spireBoss" value="" class="spanImpostor dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent bossList" id="bossList">
+				
+				</div>
+			</div>
+			<div class="spanBlock">
+				<span class="spanLabel" data-locale-string="portal_spire_type">Terrain</span>
+				<button id="spireTerrain" name="spireTerrain" value="" class="spanImpostor dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent">
+					
+				</div>
+			</div>
+			<div class="emannuelWrap">
+			</div>
+		<!--/div>
+		<div class="spanContainer statusContainer"-->
+			<div class="spanBlock inactive statusContainer">
+				<span class="spanLabel" data-locale-string="portal_spire_hazard">Hazard</span>
+				<button id="spireStatus1" name="spireStatus1" value="&#x1F7AD;" class="spanImpostor statusButton dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent statusList">
+					
+				</div>
+			</div>
+			<div class="spanBlock inactive statusContainer">
+				<span class="spanLabel" data-locale-string="portal_spire_hazard">Hazard</span>
+				<button id="spireStatus2" name="spireStatus2" value="&#x1F7AD;" class="spanImpostor statusButton dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent statusList">
+					
+				</div>
+			</div>
+			<div class="spanBlock inactive statusContainer">
+				<span class="spanLabel" data-locale-string="portal_spire_hazard">Hazard</span>
+				<button id="spireStatus3" name="spireStatus3" value="&#x1F7AD;" class="spanImpostor statusButton dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent statusList">
+					
+				</div>
+			</div>
+			<div class="spanBlock inactive statusContainer">
+				<span class="spanLabel" data-locale-string="portal_spire_hazard">Hazard</span>
+				<button id="spireStatus4" name="spireStatus4" value="&#x1F7AD;" class="spanImpostor statusButton dropdownButton">&#x1F7AD;</button>
+				<div class="dropdownContent statusList">
+					
+				</div>
+			</div>
+		</div>
+		<div class="lineContainer">
+			<div class="spanContainer smaller" >
+				<div class="spanBlock faded">
+					<span class="spanLabel" data-locale-string="evo_challenge_warlord">Warlord</span>
+					<button id="warlord" name="warlord" value="" class="spanImpostor">&#x1F7AD;</button>
+				</div>
+				<div class="spanBlock">
+					<span class="spanLabel" data-locale-string="arpa_blood_prepared_title">Prepared</span>
+					<span>
+						<input id="prepared" type="number" value="0" min="0" max="3"></input>
+					</span>
+				</div>
+				<div class="spanBlock">
+					<span class="spanLabel" data-locale-string="arpa_blood_wrath_title">Wrath</span>
+					<span>
+						<input id="wrathlvl" type="number" value="" min="0"></input>
+					</span>
+				</div>
+				<div class="spanBlock">
+					<span class="spanLabel" data-locale-string="achieve_gladiator_name">Gladiator</span>
+					<span>
+						<input id="gladiatorlvl" type="number" value="" min="0" max="5"></input>
+					</span>
+				</div>
+				<div class="spanBlock">
+					<span class="spanLabel" data-locale-string="portal_mech_size_small">Scouts</span>
+					<span>
+						<input id="scouts" type="number" value="" min="0"></input>
+					</span>
+				</div>
+				<div class="spanBlock">
+					<span class="spanLabel" data-locale-string="wiki_menu_resets">Resets</span>
+					<span>
+						<input id="resets" type="number" value="" min="0"></input>
+					</span>
+				</div>
+				<div class="spanBlock faded">
+					<span class="spanLabel">Info</span>
+					<button id="showInfoTable" name="showInfoTable" value="" class="spanImpostor">?</button>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="helpOverlay">Terrain, boss & equipment table</div>
+		<div id="infoTable" class="blockContainer smaller">
+			<div class="spanBlock">
+				<span class="spanLabel" data-locale-string="portal_spire_type">Terrain</span>
+				<div id="terrainTable" class="simpleTable">
+					<a>-Chassis-</a>
+				</div>
+			</div>
+			<div class="spanBlock">
+				<span class="spanLabel" data-locale-string="governor_criminal_t1">Boss</span>
+				<div id="resistanceTable" class="simpleTable">
+					<a>-Boss resistances-</a>
+				</div>
+			</div>
+			<div class="spanBlock">
+				<span class="spanLabel" data-locale-string="portal_mech_equipment">Equipment</span>
+				<div id="equipmentTable" class="simpleTable">
+					<a>-Equipment-</a>
+				</div>
+			</div>
+		</div>
+		
+	</section>
+	<section>
+		<div class="helpOverlay">Mech constructor</div>
+		<div class="lineContainer">
+		
+			<div class="line smaller mgrid" id="mechConstructor">
+				<div class="co0 rw0">
+					<span class="spanLabel" data-locale-string="portal_mech_size">Size</span>
+					<button id="cMechSize" name="cMechSize" value="" class="spanImpostor dropdownButton">&#x1F7AD;</button>
+					<div class="dropdownContent">
+						
+					</div>
+				</div>
+				<div class="co0 rw1">
+					<span class="spanLabel" data-locale-string="portal_mech_type">Chassis</span>
+					<button id="cMechChassis" name="cMechChassis" value="" class="spanImpostor dropdownButton">&#x1F7AD;</button>
+					<div class="dropdownContent">
+						
+					</div>
+				</div>
+				<div class="co0 rw2 faded">
+					<span class="spanLabel" data-locale-string="portal_mech_infernal">Infernal</span>
+					<button id="cMechInfernal" name="cMechInfernal" value="" class="spanImpostor cMechInfernal">&#x1F7AD;</button>
+				</div
+				><div class="co2 rw0 blockContainer" id="mechConstructorWeaponsForm">
+					<div class="spanBlock">
+						<span class="spanLabel" data-locale-string="portal_mech_weapon">Weapons</span>
+						<button id="cMechWeapon1" name="cMechWeapon1" value="" class="spanImpostor dropdownButton cMechWeapon">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechWeapon2" name="cMechWeapon2" value="" class="spanImpostor dropdownButton cMechWeapon">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechWeapon3" name="cMechWeapon3" value="" class="spanImpostor dropdownButton cMechWeapon">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechWeapon4" name="cMechWeapon4" value="" class="spanImpostor dropdownButton cMechWeapon">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+				</div>
+				<div class="co2 rw1 blockContainer" id="mechConstructorEquipForm">
+					<div class="spanBlock">
+						<span class="spanLabel" data-locale-string="portal_mech_equipment">Equipment</span>
+						<button id="cMechEquip1" name="cMechEquip1" value="" class="spanImpostor dropdownButton cMechEquip">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechEquip2" name="cMechEquip2" value="" class="spanImpostor dropdownButton cMechEquip">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechEquip3" name="cMechEquip3" value="" class="spanImpostor dropdownButton cMechEquip">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechEquip4" name="cMechEquip4" value="" class="spanImpostor dropdownButton cMechEquip">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+					<div class="spanBlock">
+						<button id="cMechEquip5" name="cMechEquip5" value="" class="spanImpostor dropdownButton cMechEquip">&#x1F7AD;</button>
+						<div class="dropdownContent">
+							
+						</div>
+					</div>
+				</div>
+				<div class="co2 rw2 blockContainer">
+					<div class="spanBlock">
+						<span class="spanLabel">&nbsp;</span>
+						<button id="cMechAdd" name="cMechAdd" value="" class="spanImpostor action">Add mech</button>
+					</div>
+				</div>
+				<div class="co1 rw2 blockContainer">
+					<div class="spanBlock stat co0 sco0 helpful pophover"
+						><span aria-label="Terrain effectivness">48%</span
+						><div class="popbox">
+							<h3>Terrain factor</h3>
+							<p>How terrain and hazards affect mech effectiveness. Includes contributions from selected equipment and scouts.</p>
+							<p>You can freely adjust number of scouts up above, to measure up their effect.</p>
+							<h3>Countering hazards</h3>
+							<p>Equipment choices marked with <span class="recommended strength-1">blue diamond</span> help counteract currently present hazards.</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div
+					></div
+					><div class="spanBlock stat co1 sco1 helpful pophover"
+						><span aria-label="Weapon effectivness">90%</span
+						><div class="popbox">
+							<h3>Weapon effectiveness</h3>
+							<p>How effective selected weapons are against current boss.</p>
+							<p>Some weapons might be affected by randomness, depending on the floor number and other factors. For better accuracy don't forget to import your current save.</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div
+					></div
+					><div class="spanBlock stat co2 sco2 helpful pophover"
+						><span aria-label="Combined effectivness">55%</span
+						><div class="popbox">
+							<h3>Combined effectiveness</h3>
+							<p>Just <i>terrain factor</i> &times; <i>weapon effectiveness</i> multiplied together, giving overall mech effectiveness factor.</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div
+					></div
+					><div class="spanBlock stat co3 sco3 helpful pophover"
+						><span class="" aria-label="Adjusted final rating">100</span
+						><div class="popbox">
+							<h3>Adjusted final rating</h3>
+							<p>Adjusted absolute mech power/rating.</p>
+							<h3>Why is it adjusted and how?</h3>
+							<p>There's only so many mechs you can fit in mechbays. How to use that limited space most efficiently?</p>
+							<p>Mechs take up certain amount of space. For example, common denominator between relevant combat mechs is <b>50</b> (with perks - <b>40</b>).
+							In that space you can fit exactly 2 <span class="titan">titans</span>, 5 <span class="large">heavy</span> or 10 <span class="medium">standard</span> mechs.
+							While sizes are different in warlord scenario, ratio stays the same.</p>
+							<p>Adjusted rating shows how much firepower you can fit in commonly denominated mechbay space.</p>
+							<p>Common denominator currently used for calculations is <b id="mechbaySpaceDenominator">120</b> .</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div
+					></div>
+				</div>
+			</div>
+			
+		</div>
+	</section>
+	<section>
+		<div class="helpOverlay">Mech list controls</div>
+		<div class="lineContainer">
+		
+			<div class="line smaller mgrid" id="mechListHeader">
+				<div class="co0 rw2 title">
+					<span class="spanLabel">Page
+						<a id="clearList" title="Delete all?" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="/icons/icons.svg#trash3"/></svg></a>
+						<div class="dropdownContent">
+							<a id="clearListArm" data-val="ask">Clear current page?</a>
+							<a id="clearListAbsolutely" class="inactive" data-val="confirm">Yes</a>
+						</div>
+						<a id="copyList" class="clickable " title="Copy" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="/icons/icons.svg#copy"/></svg></a>
+						<a id="pasteList" class="clickable dropdownButton" title="Paste" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="/icons/icons.svg#journal-arrow-down"/></svg></a>
+						<div class="dropdownContent">
+							<a id="pasteListConfirm" data-val="ask">Paste mech list here <span class="success">&#x2714;</span></a>
+							<a id="pasteListClear" data-val="ask">Clear clipboard &#x1F7AD;</a>
+						</div>
+					</span>
+					<button id="pageSelector" name="pageSelector" value="" class="spanImpostor dropdownButton">Page 1</button>
+					<div class="dropdownContent numberGrid">
+						<a>1</a>
+						<a>2</a>
+						<a>3</a>
+						<a>4</a>
+						<a>5</a>
+						<a>6</a>
+						<a>7</a>
+						<a>8</a>
+						<a>9</a>
+						<a>10</a>
+						<a class="fullSpan">One mech'd</a>
+						<a class="fullSpan">Heavy vs Titan</a>
+					</div>
+				</div>
+				<div class="co1 rw2 blockContainer"
+					><div class="spanBlock stat" title="Terrain + hazard effect">&#x26F0;&#xFE0F;&#x1F332;</div
+					><div class="spanBlock stat" title="Weapon effectivness">&#x1F4A5;</div
+					><div class="spanBlock stat sco2 clickable" title="Total effectivness" id="totalEffectHeader">&Sigma;</div
+					><div class="spanBlock stat sco3 clickable" title="Adjusted final rating" id="finalRatingHeader">#</div
+				></div
+				><div class="co2 rw2 blockContainer">
+					<div class="spanBlock">
+						<span class="spanLabel">Sorting</span>
+						<button id="sortingSelector"  aria-label="Sorting type" name="sortingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
+						<div class="dropdownContent">
+						
+						</div>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">&nbsp;</span>
+						<button id="sortingDirection" aria-label="Sorting direction" name="sortingDirection" value="" class="spanImpostor">&darr;</button>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">Grouping</span>
+						<button id="groupingSelector"  aria-label="Grouping type" name="groupingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
+						<div class="dropdownContent">
+						
+						</div>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">Descriptions</span>
+						<button id="truncateSelector" name="truncateSelector" value="" class="spanImpostor dropdownButton">Yes</button>
+						<div class="dropdownContent">
+						
+						</div>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">Style</span>
+						<button id="visStyleSwitch" aria-label="Number visual font style" name="visStyleSwitch" value="" class="spanImpostor">A</button>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">Calc&nbsp;</span>
+						<button id="openCalculator" aria-label="Open/close calculator" name="openCalculator" value="" class="spanImpostor">
+							<svg class="bi" width="1.1em" height="1.1em" fill="currentColor">
+								<use xlink:href="/icons/icons.svg#calculator"/>
+							</svg>
+						</button>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel">&nbsp;</span>
+						<button id="isVisible" aria-label="Toggle mech list display" name="isVisible" value="" class="spanImpostor">
+							<svg class="bi" width="1.1em" height="1.1em" fill="currentColor">
+								<use xlink:href="/icons/icons.svg#eye"/>
+							</svg>
+							<!--&#x1F441;--></button>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</section>
+	<section>
+		<div class="helpOverlay">Average run sim/calc</div>
+		<div id="avgCalculator"  aria-label="Average run calculator" class="lineContainer">
+			<div class="line smaller" >
+			
+				<div class="boorter"></div>
+				
+				<div id="avgCalcPageContainer">
+					<div id="avgCalcPager" style="display: none">
+						<div>
+						</div>
+					</div>
+					<div id="avgCalcInfo">
+						<h3>Average effectiveness simulation</h3>
+						<p>Let's say, you put the <b>selected page</b> of mechs into a mech bay, and left it running overnight. How would they fare? This tool throws your mech list at randomly generated floors many times over.</p>
+						
+						<h3>What to consider</h3>
+						<p>Conditions in the spire change from to floor. If left unattended, it is best to have a variety of mechs. 
+						Also scouts help smooth out chassis effectiveness across different terrain. Don't forget to include those.</p>
+						
+						<h3>Results</h3>
+						<p>The higher the number of repeats you pick, the more average results will be.</p>
+						<p>You don't necesarily have to pick out a giant list of mechs to get workable results. 
+						Average effectiveness results are still accurate, if you use mechs in same ratios as represented in the current list (as if multiplied by 2x, 3x and so on).</p>
+						<p>Of course no one is stopping you from throwing a full blown mech bay list at this thing.</p>
+						<p>This isn't a direct simulation. Some of the factors outside of the spire and passage of time (like random events or anything that interacts with seeded randomness inside the game) are not considered. So make of these results what you will.</p>
+					</div>
+				</div>
+				<form id="avgSimForm" class="blockContainer">
+					<div class="spanBlock">
+						<label for="avgStart" class="spanLabel">Starting from floor</label>
+						<input id="avgStart" data-field="avgStart" type="number" value="1" min="1" class="spanImpostor"></input>
+					</div>
+					<div class="spanBlock">
+						<label for="avgLength"  class="spanLabel">Run for [ x ] floors</label>
+						<input id="avgLength" data-field="avgLength" type="number" value="20" min="1" class="spanImpostor"></input>
+					</div>
+					<div class="spanBlock">
+						<label for="avgRepeats" class="spanLabel">Repeat this many times</label>
+						<input id="avgRepeats" data-field="avgRepeats" type="number" value="10" min="1" class="spanImpostor"></input>
+					</div>
+					<div class="spanBlock">
+						<span class="spanLabel"><progress id="simProgress" name="simProgress" value="5" max="100"class="spanImpostor">33%</progress></span>
+						<button id="avgDoIt" name="avgDoIt" value="" class="spanImpostor action">Do it!</button>
+					</div>
+					<div class="spanBlock">
+					</div>
+					<div class="spanBlock helpful pophover">
+						<label for="avgPrecise" id="avgPreciseLabel" class="checkLabel">
+							<span class="spanLabel">Precise medians</span>
+							<input id="avgPrecise" name="avgPrecise" data-field="preciseMedians" type="checkbox" class="spanImpostor"></input>
+						</label>
+						<div class="popbox">
+							<h3>Get precise medians</h3>
+							<p>Enabling this increases result processing time and memory usage.</p>
+							<p>When disabled, medians are not exactly medians, but they are REALLY close approximations. They are medians in spirit, but not mathematically.</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div>
+					</div>
+					<div class="spanBlock helpful pophover">
+						<label for="avgEdenTax" id="avgEdenTaxLabel" class="checkLabel">
+							<span data-locale-string="tech_asphodel_mech" class="spanLabel">Eden mech station</span>
+							<input id="avgEdenTax" name="avgEdenTax" data-field="avgEdenTax" type="checkbox" class="spanImpostor"></input>
+						</label>
+						<div class="popbox">
+							<h3 data-locale-string="tech_asphodel_mech">Asphodel mech security</h3>
+							<p>If you use mechbay list and your imported save has mechs stationed in <span data-locale-string="tab_eden">Edenic realm</span>
+								, first few combat mechs will <b>NOT</b> cotribute their strength.</p>
+							<p>When disabled, all mechs are counted toward total mech fleet strength during calculations.</p>
+							<div class="arrow" data-popper-arrow></div>
+						</div>
+					</div>
+					<div class="spanBlock">
+						<label for="avgThreads" class="spanLabel">Threads / workers</label>
+						<input id="avgThreads" data-field="avgThreads" type="number" value="4" min="1" max="16" class="spanImpostor"></input>
+					</div>
+				</form>
+				
+				<div class="boorter"></div>
+				
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="helpOverlay">Added mechs go here</div>
+		<div id="mechLists" class="lineContainer">
+			
+		</div>
+	</section>
+	<section id="messageBox"></section>
+</body>
+</html>
