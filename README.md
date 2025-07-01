@@ -1,5 +1,7 @@
 # MechCheatSheet
 A tool for a game '[Evolve](https://pmotschmann.github.io/Evolve/)' by @pmotschmann, to display and analyze all things related to mechs.
+
+Hosted here (https://akudeukie.github.io/MechCheatSheet/)
 ## Spire floor data
 Configure desired spire floor or import it from save data to get breakdown of:
 - Mech effectiveness in different terrain types
