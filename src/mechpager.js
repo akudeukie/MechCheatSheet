@@ -6,7 +6,7 @@ import { loc } from '../evolve/src/locale.js';
 import { timeFormat } from '../evolve/src/functions.js';
 
 import { evolve } from './data.js';
-import { inform, isSpireSetup, closeDropdownActions } from './mechcheatsheet.js';
+import { inform, isSpireSetup } from './mechcheatsheet.js';
 import { mechConstructor } from './mechconstructor.js';
 import { doTheTerrainFactorThing, doTheWeaponFactorThing, doTheFullRatingThing, adjustRawRating } from './mechfactors.js';
 
@@ -67,7 +67,6 @@ export const mechPager = {
 		pageContainer.append(bayPage.dom);
 		
 		app.on(app.EV_CLOSE_DROPDOWNS, mechPager.disarmClearList);
-		closeDropdownActions.push();
 		
 		let deleteConfirmContainer = $($('#clearList').next('.dropdownContent').get(0));
 		deleteConfirmContainer.on('click', (e)=>{ e.stopPropagation() });
@@ -773,7 +772,7 @@ class HeavyTitanPage extends MechListPage {
 		this.explainLine = $(hvtDescription);
 	};
 	syncWithConstructor(){
-		if(!['small','medium','large','titan','collector'].includes(mechConstructor.mech.size))
+		if(!evolve.mech.size.standard.includes(mechConstructor.mech.size))
 			return;
 		
 		for(let mech of this.mechList){
@@ -834,14 +833,14 @@ var mechAllSizes = evolve.mech.size.standard.concat( evolve.mech.size.warlord );
 
 const sizeSortingRatings = {
 	'collector': 0,
-    'minion': 1,
-    'small': 2,
-    'fiend': 3,
-    'medium': 4,
-    'cyberdemon': 5,
-    'large': 6,
-    'archfiend': 7,
-    'titan': 8
+	'minion': 1,
+	'small': 2,
+	'fiend': 3,
+	'medium': 4,
+	'cyberdemon': 5,
+	'large': 6,
+	'archfiend': 7,
+	'titan': 8
 };
 mechAllSizes.forEach((s)=>{
 	sizeSortingRatings[s] ??= 0;

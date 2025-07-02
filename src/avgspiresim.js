@@ -7,7 +7,7 @@ import { timeFormat } from '../evolve/src/functions.js';
 
 import { Datum, Floorum, getMedianFromArray, lerp, invlerp, sortNumbers, shrinkMedianArray } from './data.js';
 import { inform, isSpireSetup, importFloorum } from './mechcheatsheet.js';
-import { mechPager, Page } from './mechpager.js';
+import { mechPager } from './mechpager.js';
 
 //import * as test from './mechaveragerun.worker.js';
 
@@ -181,11 +181,11 @@ export const avgCalc = {
 		// Spread repeats across workers
 		let repPerWorker = 1;
 		let leftoverRepeats = 0;
-		if(sRepeats > avgCalc.workers.length){
-			repPerWorker = Math.floor(sRepeats / avgCalc.workers.length);
-			leftoverRepeats = sRepeats % avgCalc.workers.length;
+		if(sRepeats > MAX_WORKERS){
+			repPerWorker = Math.floor(sRepeats / MAX_WORKERS);
+			leftoverRepeats = sRepeats % MAX_WORKERS;
 		}
-		avgCalc.involvedWorkers = Math.min(sRepeats, avgCalc.workers.length);
+		avgCalc.involvedWorkers = Math.min(sRepeats, MAX_WORKERS);
 		
 		avgCalc.sims[avgCalc.runningSim].time.gathering = performance.now();
 		for(var i = 0; i < avgCalc.involvedWorkers; i++){
@@ -201,12 +201,13 @@ export const avgCalc = {
 				avgCalc.workers[i].onmessage = avgCalc.handleWorkerMessage;
 			}
 		}
-		else if(avgCalc.workers.length > MAX_WORKERS){
+		// Pool workers instead of terminating them
+		/* else if(avgCalc.workers.length > MAX_WORKERS){
 			for(var i = MAX_WORKERS; i < avgCalc.workers.length; i++){
 				avgCalc.workers[i].terminate();
 			}
 			avgCalc.workers.splice(MAX_WORKERS);
-		}
+		} */
 	},
 	
 	handleWorkerMessage(e){
@@ -215,7 +216,7 @@ export const avgCalc = {
 				avgCalc.sims[avgCalc.runningSim].addData(parseInt(e.data.f), e.data.e, e.data.t, e.data.slow, e.data.raw);
 				
 				let bucket = parseInt(e.data.f) - avgCalc.sims[avgCalc.runningSim].start;
-				let leftoverRepeats = (avgCalc.sims[avgCalc.runningSim].repeats > avgCalc.workers.length) ? avgCalc.sims[avgCalc.runningSim].repeats % avgCalc.workers.length : 0;
+				let leftoverRepeats = (avgCalc.sims[avgCalc.runningSim].repeats > MAX_WORKERS) ? avgCalc.sims[avgCalc.runningSim].repeats % MAX_WORKERS : 0;
 				let draw = (avgCalc.sims[avgCalc.runningSim].buckets.n[bucket] % avgCalc.involvedWorkers == 0);
 				if(leftoverRepeats > 0)
 					draw = draw || (avgCalc.sims[avgCalc.runningSim].buckets.n[bucket] % avgCalc.involvedWorkers == leftoverRepeats);
@@ -231,7 +232,8 @@ export const avgCalc = {
 			case 'progress':
 				avgCalc.workers[e.data.w]['progress'] = e.data.progress;
 				let minProgress = e.data.progress;
-				for(let worker of avgCalc.workers){
+				for(var i = 0; i < MAX_WORKERS && i < avgCalc.workers.length; i++){
+					let worker = avgCalc.workers[i];
 					if(worker['progress'] && worker['progress'] < minProgress)
 						minProgress = worker['progress'];
 				}
@@ -377,6 +379,7 @@ export const avgCalc = {
 		if(e.currentTarget?.dataset?.bucket && avgCalc.currentSim >= 0 && e.currentTarget?.dataset?.key){
 			let b = e.currentTarget.dataset.bucket;
 			if(b >= avgCalc.sims[avgCalc.currentSim].nBuckets) return;
+			if(avgCalc.sims[avgCalc.currentSim].totals.n == 0) return;
 			let key = e.currentTarget.dataset.key;
 			
 			importFloorum(( b < 0 ) ? avgCalc.sims[avgCalc.currentSim].totals.slowest[key] : avgCalc.sims[avgCalc.currentSim].slowest[key][b] );
@@ -779,12 +782,6 @@ class AverageSim {
 		this.bounds.tmed.min = this.medians.t[0];
 		this.bounds.tmed.max = this.medians.t[this.medians.t.length - 1];
 		
-		/* avgCalc.canvas.emed.b.min = 0;
-		avgCalc.canvas.emed.b.max = Math.max(1, this.medians.e[this.medians.e.length - 1]);
-		
-		avgCalc.canvas.tmed.b.min = this.medians.t[0];
-		avgCalc.canvas.tmed.b.max = this.medians.t[this.medians.t.length - 1]; */
-		
 		this.normals = {
 			'e': avgCalc.canvas.e.b, 't': avgCalc.canvas.t.b,
 			'emed': avgCalc.canvas.emed.b, 'tmed': avgCalc.canvas.tmed.b,
@@ -1014,6 +1011,7 @@ class AvgSummaryGrid {
 			this.slowestDiv.style = null;
 			if(bucket >= 0 && bucket < sim.nBuckets && sim.buckets.n[bucket] > 0){
 				
+				this.slowest[0].style = null;
 				if(!Floorum.areEqual(sim.slowest.e[bucket], sim.slowest.t[bucket])){
 					this.slowest[1].style = null;
 					this.summarizeSlowestFloor(this.slowest[0], sim, bucket, sim.slowest.e[bucket], 'e');
@@ -1025,8 +1023,9 @@ class AvgSummaryGrid {
 					//this.slowest[1].col[2].style = 'display: none';
 				}
 			}
-			else{
+			else if(sim.totals.n > 0){
 				
+				this.slowest[0].style = null;
 				if(!Floorum.areEqual(sim.totals.slowest.e, sim.totals.slowest.t)){
 					this.slowest[1].style = null;
 					this.summarizeSlowestFloor(this.slowest[0], sim, bucket, sim.totals.slowest.e, 'e');
@@ -1037,6 +1036,10 @@ class AvgSummaryGrid {
 					this.slowest[1].style = 'visibility: hidden';
 					//this.slowest[1].col[2].style = 'display: none';
 				}
+			}
+			else {
+				this.slowest[0].style = 'visibility: hidden';
+				this.slowest[1].style = 'visibility: hidden';
 			}
 		}
 	};
@@ -1071,32 +1074,4 @@ class AvgSummaryGrid {
 			}
 		}
 	}
-}
-
-class AvgSummaryPage extends Page {
-	constructor(key, name, descriptor) {
-		super();
-		
-		this.key = key;
-		this.name = name;
-		this.descriptor = descriptor;
-		
-		this.dom = document.createElement('div');
-		this.dom.id = `avgSummary-${this.key}`;
-	};
-	
-	show() {
-		if(this.shown) return;
-		this.dom.style = '';
-		this.shown = true;
-	};
-	hide() {
-		if(!this.shown) return;
-		this.dom.hide();
-		this.shown = false;
-	};
-	update() {
-		if(!this.shown) return;
-		
-	};
 }

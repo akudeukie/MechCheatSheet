@@ -201,7 +201,7 @@ function updatePagerVisibility(){
 
 function populateMenus(){
 	let terrainSelector = $('#spireTerrain');
-    let terrainTypes = evolve.spire.terrain.slice();
+	let terrainTypes = evolve.spire.terrain.slice();
 	
 	let terrainDropdown = $(terrainSelector.next('.dropdownContent').get(0));
 	let terrainHtml = '';
@@ -612,8 +612,6 @@ function bindLocaleStrings(){
 			}
 	});
 }
-
-export const closeDropdownActions = [];
 
 function initDropdowns(){
 	$('.dropdownButton').on('click', (e)=>{

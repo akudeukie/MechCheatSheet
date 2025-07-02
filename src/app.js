@@ -6,7 +6,7 @@ import { sampleMechBay, oopsAllCollectors, rainbowMechBay } from './samplemechs.
 export const numFormat = new Intl.NumberFormat(undefined);
 
 export const app = {
-	version: '1.0.0',
+	version: '1.0.1',
 	LS_SString: 'storedSaveString',
 	LS_Config: 'storedConfig',
 	LS_MechList: 'favMechs',
@@ -47,18 +47,18 @@ export const app = {
 	labels: {},
 	heap: {},
 	
-    events: {},
+	events: {},
 	EV_CONSTRUCTOR: 'eon_constructor',
 	EV_CLOSE_DROPDOWNS: 'eon_closedropdowns',
 
-    on: function(event, callback) {
-        let handlers = app.events[event] || [];
-        handlers.push(callback);
-        app.events[event] = handlers;
-    },
+	on: function(event, callback) {
+		let handlers = app.events[event] || [];
+		handlers.push(callback);
+		app.events[event] = handlers;
+	},
 	
-    off: function(event, callback) {
-        let handlers = app.events[event] || [];
+	off: function(event, callback) {
+		let handlers = app.events[event] || [];
 		if(callback){
 			let cix = handlers.indexOf(callback);
 			if(cix != -1){
@@ -69,18 +69,18 @@ export const app = {
 		else{
 			app.events[event] = [];
 		}
-    },
+	},
 
-    dispatchEvent: function(event, data) {
-        let handlers = app.events[event];
+	dispatchEvent: function(event, data) {
+		let handlers = app.events[event];
 
-        if (!handlers || handlers.length < 1)
-            return;
+		if (!handlers || handlers.length < 1)
+			return;
 
-        handlers.forEach(function(handler){
-            handler(data);
-        });
-    }
+		handlers.forEach(function(handler){
+			handler(data);
+		});
+	}
 };
 
 export function initData(){

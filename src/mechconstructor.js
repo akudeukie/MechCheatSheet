@@ -90,7 +90,7 @@ export const mechConstructor = {
 		let oHtml = '';
 		let sizeButton = $('#cMechSize');
 		let sizeSelector = $(sizeButton.next('.dropdownContent').get(0)).empty();
-        let sizeTypes = mechConstructor.config['warlord'] ? evolve.mech.size.warlord : evolve.mech.size.standard;
+		let sizeTypes = mechConstructor.config['warlord'] ? evolve.mech.size.warlord : evolve.mech.size.standard;
 		sizeTypes.forEach(function(val, i){
 			let effectDelta = 0;
 			if(global.portal?.spire?.status){
@@ -124,7 +124,7 @@ export const mechConstructor = {
 		
 		let typeButton = $('#cMechChassis');
 		let typeSelector = $(typeButton.next('.dropdownContent').get(0)).empty();
-        let typeList = validChassisTypes(mechConstructor.mech);
+		let typeList = validChassisTypes(mechConstructor.mech);
 		
 		oHtml = '';
 		mechConstructor.dummy.size = mechConstructor.mech.size;
@@ -203,7 +203,7 @@ export const mechConstructor = {
 			}
 		});
 		
-        let e_cap = mechConstructor.config['prepared'] ? 5 : 4;
+		let e_cap = mechConstructor.config['prepared'] ? 5 : 4;
 		$('.cMechEquip').each((i, el)=>{
 			let $el = $(el);
 			let equips = validEquipment(mechConstructor.mech.size, mechConstructor.mech.chassis, i);

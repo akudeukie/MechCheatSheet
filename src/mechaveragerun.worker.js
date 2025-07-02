@@ -21,6 +21,7 @@ onmessage = (e) => {
 
 var wId = 0;
 var runTimer;
+var isRunning = false;
 
 const CHUNK_SIZE = 75;
 var STOP_NOW = false;
@@ -40,6 +41,7 @@ var precise = false;
 function startWork(data){
 	clearTimeout(runTimer);
 	STOP_NOW = false;
+	isRunning = true;
 	
 	if(data['mechs'] && data['mechs'].length > 0 && data['global']){
 		wId = data.wId;
@@ -95,7 +97,10 @@ function startWork(data){
 function stopWork(){
 	STOP_NOW = true;
 	clearTimeout(runTimer);
-	postMessage({'a':'done', 'w': wId});
+	if(isRunning)
+		postMessage({'a':'done', 'w': wId});
+	
+	isRunning = false;
 }
 
 function runSomething(){
@@ -223,6 +228,7 @@ function runSomething(){
 		// Done!
 		postMessage({'a':'progress', 'w': wId, 'progress': 1});
 		postMessage({'a':'done', 'w': wId});
+		isRunning = false;
 		
 		// Cleanup
 		effiResults.length = 0;

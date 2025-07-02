@@ -12,6 +12,7 @@ export function Floorum(floor, boss, terrain, hazards) {
 	this.status = structuredClone(hazards);
 }
 Floorum.areEqual = function(one, another) {
+	if(!one || !another) return false;
 	if(one.count != another.count) return false;
 	if(one.boss != another.boss) return false;
 	if(one.type != another.type) return false;
