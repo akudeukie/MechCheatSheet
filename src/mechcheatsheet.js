@@ -42,11 +42,11 @@ export function importSaveString(){
 			let errors = 0;
 	
 			if(!global.portal?.mechbay) {
-				inform('error', 'Mechbay was not found');
+				inform('error', loc('mcs_error_nomechbay'));
 				errors++;
 			}
 			if(!global.portal?.spire){
-				inform('error', 'Spire was not found');
+				inform('error', loc('mcs_error_nospire'));
 				errors++;
 				initData();
 				
@@ -95,17 +95,17 @@ export function importSaveString(){
 			}, 0);
 			
 			if(errors == 0) 
-				inform('success', 'Import was successful');
+				inform('success', loc('mcs_success_import'));
 			
 		}
 		else {
-			inform('error', 'Invalid input string');
+			inform('error', loc('mcs_error_invalid_str'));
 		}
 		
 		importData = null;
 	}
 	else {
-		inform('error', 'Input string is empty');
+		inform('error', loc('mcs_error_empty_str'));
 	}
 	visual.update.calcEdenTax();
 }
@@ -235,9 +235,9 @@ function populateMenus(){
 	let truncateButton = $('#truncateSelector');
 	let truncateDropdown = $(truncateButton.next('.dropdownContent').get(0));
 	truncationOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`;
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`;
 		if(app.config.truncateWeapons == opt.val){
-			truncateButton.text(opt.short);
+			truncateButton.text(loc(opt.short));
 		};
 	});
 	truncateDropdown.append($(oHtml).on(
@@ -255,9 +255,9 @@ function populateMenus(){
 	let listSortingButton = $('#sortingSelector');
 	let listSortingDropdown = $(listSortingButton.next('.dropdownContent').get(0));
 	listSortingOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`
 		if(app.config.sortingType == opt.val){
-			listSortingButton.text(opt.short);
+			listSortingButton.text(loc(opt.short));
 		};
 	});
 	listSortingDropdown.append($(oHtml).on(
@@ -288,9 +288,9 @@ function populateMenus(){
 	let listGroupingButton = $('#groupingSelector');
 	let listGroupingDropdown = $(listGroupingButton.next('.dropdownContent').get(0));
 	listGroupingOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`;
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`;
 		if(app.config.groupingType == opt.val){
-			listGroupingButton.text(opt.short);
+			listGroupingButton.text(loc(opt.short));
 		};
 	});
 	listGroupingDropdown.append($(oHtml).on(
@@ -461,7 +461,7 @@ function pickBoss(e){
 function pickStatus(e){
 	let status = e.currentTarget.dataset.val
 	if(status && global.portal.spire?.status && global.portal.spire.status[status] == true){
-		inform('info', 'Hazard is already present');
+		inform('info', loc('mcs_info_hazard_present'));
 		return;
 	}
 	
@@ -558,7 +558,7 @@ export function inform(type, info, id, actions = []){
 	
 	if(id && $(`#${id}`).length > 0) return;
 	
-	let msgb = $(`<div class="${type}"${(id)? `id="${id}"` : ''}>${info}</div>`);
+	let msgb = $(`<div class="${type}"${(id)? `id="${id}"` : ''}></div>`).text(info);
 	$('#messageBox').append(msgb);
 	setTimeout(()=>{msgb.fadeOut(500, ()=>{msgb.remove()})}, timeout);
 }
@@ -593,22 +593,34 @@ function onFormInput(e){
 function bindLocaleStrings(){
 	$('[data-locale-string]').each((i, el)=>{
 		if(el.dataset.localeString)
-			switch(el.dataset.localeString){
-				case 'portal_spire_type':
-				case 'portal_spire_hazard':
-					let locString = loc(el.dataset.localeString);
-					locString = locString.split(/[:：]+/)[0];
-					locString = locString.split("：")[0];
-					$(el).text( locString );
-					break;
-				case 'portal_mech_size_small':
-					if(app.config.locale != 'en-US')
-						$(el).text( loc(el.dataset.localeString) + ' #' );
-					else
-						$(el).text( loc(el.dataset.localeString) + 's' );
-					break;
-				default:
-					$(el).text( loc(el.dataset.localeString) );
+			if(el.dataset.localeString.indexOf(',') !== -1){
+				let strings = el.dataset.localeString.split(',');
+				switch(strings[0]){
+					case 'i':
+						$(el).text( loc(strings[1]).toLowerCase() );
+						break;
+					default:
+						$(el).text( loc(strings[0], strings.slice(1).map((s)=>loc(s))) );
+				}
+			}
+			else{
+				switch(el.dataset.localeString){
+					case 'portal_spire_type':
+					case 'portal_spire_hazard':
+						let locString = loc(el.dataset.localeString);
+						locString = locString.split(/[:：]+/)[0];
+						locString = locString.split("：")[0];
+						$(el).text( locString );
+						break;
+					case 'portal_mech_size_small':
+						if(app.config.locale != 'en-US')
+							$(el).text( loc(el.dataset.localeString) + ' #' );
+						else
+							$(el).text( loc(el.dataset.localeString) + 's' );
+						break;
+					default:
+						$(el).text( loc(el.dataset.localeString) );
+				}
 			}
 	});
 }
@@ -843,6 +855,6 @@ var goTopThreshold = 160;
 	initEvents();
 	
 	if(!app.localStorage)
-		inform('error', 'Local Storage is not available');
+		inform('error', loc('mcs_error_lstorage'));
 	
 })();

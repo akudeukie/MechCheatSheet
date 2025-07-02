@@ -202,7 +202,7 @@
 					</span>
 				</div>
 				<div class="spanBlock faded">
-					<span class="spanLabel">Info</span>
+					<span class="spanLabel" data-locale-string="mcs_lbl_info">Info</span>
 					<button id="showInfoTable" name="showInfoTable" value="" class="spanImpostor">?</button>
 				</div>
 			</div>
@@ -318,50 +318,50 @@
 				<div class="co2 rw2 blockContainer">
 					<div class="spanBlock">
 						<span class="spanLabel">&nbsp;</span>
-						<button id="cMechAdd" name="cMechAdd" value="" class="spanImpostor action">Add mech</button>
+						<button id="cMechAdd" name="cMechAdd" value="" class="spanImpostor action" data-locale-string="mcs_constructor_add_mech">Add mech</button>
 					</div>
 				</div>
 				<div class="co1 rw2 blockContainer">
 					<div class="spanBlock stat co0 sco0 helpful pophover"
 						><span aria-label="Terrain effectivness">48%</span
 						><div class="popbox">
-							<h3>Terrain factor</h3>
-							<p>How terrain and hazards affect mech effectiveness. Includes contributions from selected equipment and scouts.</p>
-							<p>You can freely adjust number of scouts up above, to measure up their effect.</p>
-							<h3>Countering hazards</h3>
-							<p>Equipment choices marked with <span class="recommended strength-1">blue diamond</span> help counteract currently present hazards.</p>
+							<h3 data-locale-string="mcs_con_tefactor">Terrain factor</h3>
+							<p data-locale-string="mcs_con_tefactor_par1"></p>
+							<p data-locale-string="mcs_con_tefactor_par2"></p>
+							<h3 data-locale-string="mcs_con_tefactor_2">Countering hazards</h3>
+							<p><span data-locale-string="mcs_con_tefactor_par3_a"></span> <span class="recommended strength-1" data-locale-string="mcs_con_tefactor_par3_b"></span> <span data-locale-string="mcs_con_tefactor_par3_c"></span></p>
 							<div class="arrow" data-popper-arrow></div>
 						</div
 					></div
 					><div class="spanBlock stat co1 sco1 helpful pophover"
 						><span aria-label="Weapon effectivness">90%</span
 						><div class="popbox">
-							<h3>Weapon effectiveness</h3>
-							<p>How effective selected weapons are against current boss.</p>
-							<p>Some weapons might be affected by randomness, depending on the floor number and other factors. For better accuracy don't forget to import your current save.</p>
+							<h3 data-locale-string="mcs_con_wefactor">Weapon effectiveness</h3>
+							<p data-locale-string="mcs_con_wefactor_par1"></p>
+							<p data-locale-string="mcs_con_wefactor_par2"></p>
 							<div class="arrow" data-popper-arrow></div>
 						</div
 					></div
 					><div class="spanBlock stat co2 sco2 helpful pophover"
 						><span aria-label="Combined effectivness">55%</span
 						><div class="popbox">
-							<h3>Combined effectiveness</h3>
-							<p>Just <i>terrain factor</i> &times; <i>weapon effectiveness</i> multiplied together, giving overall mech effectiveness factor.</p>
+							<h3 data-locale-string="mcs_con_sufactor">Combined effectiveness</h3>
+							<p><span data-locale-string="mcs_con_sufactor_par1_a"></span> <i data-locale-string="i,mcs_con_tefactor"></i> &times; <i data-locale-string="i,mcs_con_wefactor"></i> <span data-locale-string="mcs_con_sufactor_par1_b"></span></p>
 							<div class="arrow" data-popper-arrow></div>
 						</div
 					></div
 					><div class="spanBlock stat co3 sco3 helpful pophover"
 						><span class="" aria-label="Adjusted final rating">100</span
 						><div class="popbox">
-							<h3>Adjusted final rating</h3>
-							<p>Adjusted absolute mech power/rating.</p>
-							<h3>Why is it adjusted and how?</h3>
-							<p>There's only so many mechs you can fit in mechbays. How to use that limited space most efficiently?</p>
-							<p>Mechs take up certain amount of space. For example, common denominator between relevant combat mechs is <b>50</b> (with perks - <b>40</b>).
-							In that space you can fit exactly 2 <span class="titan">titans</span>, 5 <span class="large">heavy</span> or 10 <span class="medium">standard</span> mechs.
-							While sizes are different in warlord scenario, ratio stays the same.</p>
-							<p>Adjusted rating shows how much firepower you can fit in commonly denominated mechbay space.</p>
-							<p>Common denominator currently used for calculations is <b id="mechbaySpaceDenominator">120</b> .</p>
+							<h3 data-locale-string="mcs_con_adfactor">Adjusted final rating</h3>
+							<p data-locale-string="mcs_con_adfactor_par1"></p>
+							<h3 data-locale-string="mcs_con_adfactor2">Why is it adjusted and how?</h3>
+							<p data-locale-string="mcs_con_adfactor_par2"></p>
+							<p><span data-locale-string="mcs_con_adfactor_par3_a"></span> <b>50</b> (<span data-locale-string="mcs_con_adfactor_par3_b"></span> - <b>40</b>).
+							<span data-locale-string="mcs_con_adfactor_par3_c"></span> 2 <span class="titan" data-locale-string="portal_mech_size_titan">titans</span>, 5 <span class="large" data-locale-string="portal_mech_size_large">heavy</span> or 10 <span class="medium" data-locale-string="portal_mech_size_medium">standard</span> 
+							<span data-locale-string="mcs_con_adfactor_par3_d"></span></p>
+							<p data-locale-string="mcs_con_adfactor_par4"></p>
+							<p><span data-locale-string="mcs_con_adfactor_par5_a"></span> <b id="mechbaySpaceDenominator">120</b> .</p>
 							<div class="arrow" data-popper-arrow></div>
 						</div
 					></div>
@@ -376,11 +376,11 @@
 		
 			<div class="line smaller mgrid" id="mechListHeader">
 				<div class="co0 rw2 title">
-					<span class="spanLabel">Page
+					<span class="spanLabel"><span data-locale-string="mcs_pager_page">Page</span>
 						<a id="clearList" title="Delete all?" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#trash3"/></svg></a>
 						<div class="dropdownContent">
-							<a id="clearListArm" data-val="ask">Clear current page?</a>
-							<a id="clearListAbsolutely" class="inactive" data-val="confirm">Yes</a>
+							<a id="clearListArm" data-val="ask" data-locale-string="mcs_pager_delete_confirm1">Clear current page?</a>
+							<a id="clearListAbsolutely" class="inactive" data-val="confirm" data-locale-string="mcs_pager_delete_confirm2">Yes</a>
 						</div>
 						<a id="copyList" class="clickable " title="Copy" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#copy"/></svg></a>
 						<a id="pasteList" class="clickable dropdownButton" title="Paste" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#journal-arrow-down"/></svg></a>
@@ -413,7 +413,7 @@
 				></div
 				><div class="co2 rw2 blockContainer">
 					<div class="spanBlock">
-						<span class="spanLabel">Sorting</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_sorting">Sorting</span>
 						<button id="sortingSelector"  aria-label="Sorting type" name="sortingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
 						<div class="dropdownContent">
 						
@@ -424,25 +424,25 @@
 						<button id="sortingDirection" aria-label="Sorting direction" name="sortingDirection" value="" class="spanImpostor">&darr;</button>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Grouping</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_grouping">Grouping</span>
 						<button id="groupingSelector"  aria-label="Grouping type" name="groupingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
 						<div class="dropdownContent">
 						
 						</div>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Descriptions</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_descriptions">Descriptions</span>
 						<button id="truncateSelector" name="truncateSelector" value="" class="spanImpostor dropdownButton">Yes</button>
 						<div class="dropdownContent">
 						
 						</div>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Style</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_style">Style</span>
 						<button id="visStyleSwitch" aria-label="Number visual font style" name="visStyleSwitch" value="" class="spanImpostor">A</button>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Calc&nbsp;</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_calc">Calc&nbsp;</span>
 						<button id="openCalculator" aria-label="Open/close calculator" name="openCalculator" value="" class="spanImpostor">
 							<svg class="bi" width="1.1em" height="1.1em" fill="currentColor">
 								<use xlink:href="./icons/icons.svg#calculator"/>
@@ -475,49 +475,47 @@
 						</div>
 					</div>
 					<div id="avgCalcInfo">
-						<h3>Average effectiveness simulation</h3>
-						<p>Let's say, you put the <b>selected page</b> of mechs into a mech bay, and left it running overnight. How would they fare? This tool throws your mech list at randomly generated floors many times over.</p>
+						<h3 data-locale-string="mcs_calc_info_1">Average effectiveness simulation</h3>
+						<p><span data-locale-string="mcs_calc_info_1_a"></span> <b data-locale-string="mcs_calc_info_1_b"></b> <span data-locale-string="mcs_calc_info_1_c"></span></p>
 						
-						<h3>What to consider</h3>
-						<p>Conditions in the spire change from to floor. If left unattended, it is best to have a variety of mechs. 
-						Also scouts help smooth out chassis effectiveness across different terrain. Don't forget to include those.</p>
+						<h3 data-locale-string="mcs_calc_info_2">What to consider</h3>
+						<p data-locale-string="mcs_calc_info_2_a"></p>
 						
-						<h3>Results</h3>
-						<p>The higher the number of repeats you pick, the more average results will be.</p>
-						<p>You don't necesarily have to pick out a giant list of mechs to get workable results. 
-						Average effectiveness results are still accurate, if you use mechs in same ratios as represented in the current list (as if multiplied by 2x, 3x and so on).</p>
-						<p>Of course no one is stopping you from throwing a full blown mech bay list at this thing.</p>
-						<p>This isn't a direct simulation. Some of the factors outside of the spire and passage of time (like random events or anything that interacts with seeded randomness inside the game) are not considered. So make of these results what you will.</p>
+						<h3 data-locale-string="mcs_calc_info_3">Results</h3>
+						<p data-locale-string="mcs_calc_info_3_a"></p>
+						<p data-locale-string="mcs_calc_info_3_b"></p>
+						<p data-locale-string="mcs_calc_info_3_c"></p>
+						<p data-locale-string="mcs_calc_info_3_d"></p>
 					</div>
 				</div>
 				<form id="avgSimForm" class="blockContainer">
 					<div class="spanBlock">
-						<label for="avgStart" class="spanLabel">Starting from floor</label>
+						<label for="avgStart" class="spanLabel" data-locale-string="mcs_calc_lbl_start">Starting from floor</label>
 						<input id="avgStart" data-field="avgStart" type="number" value="1" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
-						<label for="avgLength"  class="spanLabel">Run for [ x ] floors</label>
+						<label for="avgLength"  class="spanLabel" data-locale-string="mcs_calc_lbl_length">Run for [ x ] floors</label>
 						<input id="avgLength" data-field="avgLength" type="number" value="20" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
-						<label for="avgRepeats" class="spanLabel">Repeat this many times</label>
+						<label for="avgRepeats" class="spanLabel" data-locale-string="mcs_calc_lbl_repeats">Repeat this many times</label>
 						<input id="avgRepeats" data-field="avgRepeats" type="number" value="10" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
 						<span class="spanLabel"><progress id="simProgress" name="simProgress" value="5" max="100"class="spanImpostor">33%</progress></span>
-						<button id="avgDoIt" name="avgDoIt" value="" class="spanImpostor action">Do it!</button>
+						<button id="avgDoIt" name="avgDoIt" value="" class="spanImpostor action" data-locale-string="mcs_calc_btn_doit">Do it!</button>
 					</div>
 					<div class="spanBlock">
 					</div>
 					<div class="spanBlock helpful pophover">
 						<label for="avgPrecise" id="avgPreciseLabel" class="checkLabel">
-							<span class="spanLabel">Precise medians</span>
+							<span class="spanLabel" data-locale-string="mcs_calc_lbl_precise_medians">Precise medians</span>
 							<input id="avgPrecise" name="avgPrecise" data-field="preciseMedians" type="checkbox" class="spanImpostor"></input>
 						</label>
 						<div class="popbox">
-							<h3>Get precise medians</h3>
-							<p>Enabling this increases result processing time and memory usage.</p>
-							<p>When disabled, medians are not exactly medians, but they are REALLY close approximations. They are medians in spirit, but not mathematically.</p>
+							<h3 data-locale-string="mcs_calc_precise">Get precise medians</h3>
+							<p data-locale-string="mcs_calc_precise_a"></p>
+							<p data-locale-string="mcs_calc_precise_b"></p>
 							<div class="arrow" data-popper-arrow></div>
 						</div>
 					</div>
@@ -528,14 +526,13 @@
 						</label>
 						<div class="popbox">
 							<h3 data-locale-string="tech_asphodel_mech">Asphodel mech security</h3>
-							<p>If you use mechbay list and your imported save has mechs stationed in <span data-locale-string="tab_eden">Edenic realm</span>
-								, first few combat mechs will <b>NOT</b> cotribute their strength.</p>
-							<p>When disabled, all mechs are counted toward total mech fleet strength during calculations.</p>
+							<p><span data-locale-string="mcs_calc_eden_a"></span> <b data-locale-string="mcs_calc_eden_b">NOT</b> <span data-locale-string="mcs_calc_eden_c"></span></p>
+							<p data-locale-string="mcs_calc_eden_d"></p>
 							<div class="arrow" data-popper-arrow></div>
 						</div>
 					</div>
 					<div class="spanBlock">
-						<label for="avgThreads" class="spanLabel">Threads / workers</label>
+						<label for="avgThreads" class="spanLabel" data-locale-string="mcs_calc_lbl_threads">Threads / workers</label>
 						<input id="avgThreads" data-field="avgThreads" type="number" value="4" min="1" max="16" class="spanImpostor"></input>
 					</div>
 				</form>

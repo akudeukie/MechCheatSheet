@@ -125,11 +125,11 @@ export const avgCalc = {
 			for(var i = 0; i < avgCalc.workers.length; i++){
 				avgCalc.workers[i].postMessage({'a': 'stop'});
 			}
-			$('#avgDoIt').text('Do it!');
+			$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 			return;
 		}
 		else{
-			$('#avgDoIt').text('Stop');
+			$('#avgDoIt').text(loc('mcs_calc_btn_stop'));
 			avgCalc.running = true;
 		}
 		
@@ -249,23 +249,26 @@ export const avgCalc = {
 					avgCalc.showSim(avgCalc.runningSim);
 					//avgCalc.summarizer.summarize( avgCalc.sims[avgCalc.runningSim] );
 					avgCalc.running = false;
-					$('#avgDoIt').text('Do it!');
+					$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 				}
 				break;
 			case 'error':
+				let errmsg;
 				switch(e.data['error']){
 					case 'no_mechs':
-						avgCalc.sims[avgCalc.runningSim].descriptor = 'Where are the mechs?';
-						inform('info', 'Where are the mechs?', 'sim_no_mechs');
+						errmsg = loc('mcs_info_no_mechs');
+						avgCalc.sims[avgCalc.runningSim].descriptor = errmsg;
+						inform('info', errmsg, 'sim_no_mechs');
 						break;
 					case 'mechs_busy':
-						avgCalc.sims[avgCalc.runningSim].descriptor = `All mechs are busy in ${loc('tab_eden')}`;
-						inform('info', `All mechs are busy in ${loc('tab_eden')}`, 'sim_eden');
+						errmsg = loc('mcs_stuck_in_eden', [loc('tab_eden')]);
+						avgCalc.sims[avgCalc.runningSim].descriptor = errmsg;
+						inform('info', errmsg, 'sim_eden');
 						break;
 				}
 				//avgCalc.sims[avgCalc.runningSim].done = true;
 				avgCalc.running = false;
-				$('#avgDoIt').text('Do it!');
+				$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 				avgCalc.summarizer.summarize( avgCalc.sims[avgCalc.runningSim] );
 				avgCalc.summarizer.clear();
 				break;
@@ -328,7 +331,7 @@ export const avgCalc = {
 				.on('click', (e)=>{ if(e.target?.dataset?.val >= 0) avgCalc.showSim(parseInt(e.target.dataset.val)); }));
 				
 			
-			avgCalc.sims.push( (sim === undefined) ? new AverageSim(1, 0, 0, '', 'Start a new calculation', false) : sim );
+			avgCalc.sims.push( (sim === undefined) ? new AverageSim(1, 0, 0, '', loc('mcs_calc_sim_suggest_start'), false) : sim );
 			avgCalc.currentSim = avgCalc.sims.length - 1;
 			avgCalc.pages++;
 		}
@@ -838,13 +841,13 @@ class AvgSummaryGrid {
 		let eHeader = document.createElement('div');
 		eHeader.className = `co0 header`;
 		eHeader.appendChild(medianCanvases[0]);
-		eHeader.appendChild(document.createTextNode('Efficiency'));
+		eHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_effi')));
 		
 		this.statDiv.appendChild(eHeader);
 		Object.keys(new Datum()).forEach(function(key, i){
 			let dataLabel = document.createElement('div');
 			dataLabel.className = `co0`;
-			dataLabel.appendChild(document.createTextNode(`${key}:`));
+			dataLabel.appendChild(document.createTextNode(`${loc(`mcs_calc_key_${key}`)}:`));
 			let eVal = document.createElement('div');
 			eVal.className = `co1`;
 			
@@ -856,18 +859,18 @@ class AvgSummaryGrid {
 		
 		this.bHeader = document.createElement('div');
 		this.bHeader.className = `co0 bucket`;
-		this.bHeader.appendChild(document.createTextNode('Total'));
+		this.bHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_total')));
 		let tHeader = document.createElement('div');
 		tHeader.className = `co0 header`;
 		tHeader.appendChild(medianCanvases[1]);
-		tHeader.appendChild(document.createTextNode('Time'));
+		tHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_time')));
 		
 		this.statDiv.appendChild(this.bHeader);
 		this.statDiv.appendChild(tHeader);
 		Object.keys(new Datum()).forEach(function(key, i){
 			let dataLabel = document.createElement('div');
 			dataLabel.className = `co0`;
-			dataLabel.appendChild(document.createTextNode(`${key}:`));
+			dataLabel.appendChild(document.createTextNode(`${loc(`mcs_calc_key_${key}`)}:`));
 			let tVal = document.createElement('div');
 			tVal.className = `co1`;
 			
@@ -884,7 +887,7 @@ class AvgSummaryGrid {
 		
 		let slowestTitle = document.createElement('span');
 		slowestTitle.className = 'label';
-		slowestTitle.appendChild(document.createTextNode('Slowest floor:'));
+		slowestTitle.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_slowest_floor')));
 		this.slowestDiv.appendChild(slowestTitle);
 		
 		for(let i = 0; i < 2; i++){
@@ -938,7 +941,7 @@ class AvgSummaryGrid {
 	}
 	summarize(sim, bucket = -1) {
 		this.label.textContent = sim.label;
-		this.descriptor.textContent = (sim.done)? sim.descriptor + ' | Done \u{2714}' : sim.descriptor;
+		this.descriptor.textContent = (sim.done)? sim.descriptor + ` | ${loc('mcs_calc_sim_done')} \u{2714}` : sim.descriptor;
 		this.footers[0].textContent = '\u00a0';
 		this.footers[1].textContent = '\u00a0';
 		this.slowestDiv.style = 'display: none';
@@ -948,7 +951,7 @@ class AvgSummaryGrid {
 		if(sim.done){
 			let effBucket, timeBucket;
 			if(bucket >= 0 && bucket < sim.nBuckets){
-				this.bHeader.textContent = `Floor [${sim.start + bucket}]`;
+				this.bHeader.textContent = `${loc('mcs_calc_summary_lbl_floor')} [${sim.start + bucket}]`;
 				if(sim.buckets.n[bucket] > 0){
 					effBucket = sim.buckets.e[bucket];
 					timeBucket = sim.buckets.t[bucket];
@@ -959,7 +962,7 @@ class AvgSummaryGrid {
 				}
 			}
 			else{
-				this.bHeader.textContent = 'Total';
+				this.bHeader.textContent = loc('mcs_calc_summary_lbl_total');
 				effBucket = sim.totals.e;
 				timeBucket = sim.totals.t;
 			}
@@ -1005,8 +1008,8 @@ class AvgSummaryGrid {
 		
 		if(sim.done){
 			let gatheringStr = (sim.time.gathering > 1000) ? timeFormat(sim.time.gathering/1000) : `${Math.round(sim.time.gathering)}ms`;
-			this.footers[0].textContent = `Done! Average time per floor ${timeFormat(sim.totals.t.avg)}`
-			this.footers[1].textContent = ` | Gathering: ${gatheringStr} | Finalizing: ${(Math.floor(sim.time.finalizing * 100) / 100).toFixed(2)}ms`;
+			this.footers[0].textContent = loc('mcs_calc_summary_done_time_a', [timeFormat(sim.totals.t.avg)]);
+			this.footers[1].textContent = loc('mcs_calc_summary_done_time_b', [gatheringStr, (Math.floor(sim.time.finalizing * 100) / 100).toFixed(2)]);
 			
 			this.slowestDiv.style = null;
 			if(bucket >= 0 && bucket < sim.nBuckets && sim.buckets.n[bucket] > 0){
