@@ -6,7 +6,7 @@ import { sampleMechBay, oopsAllCollectors, rainbowMechBay } from './samplemechs.
 export const numFormat = new Intl.NumberFormat(undefined);
 
 export const app = {
-	version: '1.0.1',
+	version: '1.0.2',
 	LS_SString: 'storedSaveString',
 	LS_Config: 'storedConfig',
 	LS_MechList: 'favMechs',

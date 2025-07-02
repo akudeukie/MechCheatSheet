@@ -331,7 +331,7 @@ export const avgCalc = {
 				.on('click', (e)=>{ if(e.target?.dataset?.val >= 0) avgCalc.showSim(parseInt(e.target.dataset.val)); }));
 				
 			
-			avgCalc.sims.push( (sim === undefined) ? new AverageSim(1, 0, 0, '', 'Start a new calculation', false) : sim );
+			avgCalc.sims.push( (sim === undefined) ? new AverageSim(1, 0, 0, '', loc('mcs_calc_sim_suggest_start'), false) : sim );
 			avgCalc.currentSim = avgCalc.sims.length - 1;
 			avgCalc.pages++;
 		}
@@ -847,7 +847,7 @@ class AvgSummaryGrid {
 		Object.keys(new Datum()).forEach(function(key, i){
 			let dataLabel = document.createElement('div');
 			dataLabel.className = `co0`;
-			dataLabel.appendChild(document.createTextNode(`${key}:`));
+			dataLabel.appendChild(document.createTextNode(`${loc(`mcs_calc_key_${key}`)}:`));
 			let eVal = document.createElement('div');
 			eVal.className = `co1`;
 			
@@ -870,7 +870,7 @@ class AvgSummaryGrid {
 		Object.keys(new Datum()).forEach(function(key, i){
 			let dataLabel = document.createElement('div');
 			dataLabel.className = `co0`;
-			dataLabel.appendChild(document.createTextNode(`${key}:`));
+			dataLabel.appendChild(document.createTextNode(`${loc(`mcs_calc_key_${key}`)}:`));
 			let tVal = document.createElement('div');
 			tVal.className = `co1`;
 			
@@ -941,7 +941,7 @@ class AvgSummaryGrid {
 	}
 	summarize(sim, bucket = -1) {
 		this.label.textContent = sim.label;
-		this.descriptor.textContent = (sim.done)? sim.descriptor + ' | Done \u{2714}' : sim.descriptor;
+		this.descriptor.textContent = (sim.done)? sim.descriptor + ` | ${loc('mcs_calc_sim_done')} \u{2714}` : sim.descriptor;
 		this.footers[0].textContent = '\u00a0';
 		this.footers[1].textContent = '\u00a0';
 		this.slowestDiv.style = 'display: none';
@@ -951,7 +951,7 @@ class AvgSummaryGrid {
 		if(sim.done){
 			let effBucket, timeBucket;
 			if(bucket >= 0 && bucket < sim.nBuckets){
-				this.bHeader.textContent = `Floor [${sim.start + bucket}]`;
+				this.bHeader.textContent = `${loc('mcs_calc_summary_lbl_floor')} [${sim.start + bucket}]`;
 				if(sim.buckets.n[bucket] > 0){
 					effBucket = sim.buckets.e[bucket];
 					timeBucket = sim.buckets.t[bucket];
@@ -1008,8 +1008,8 @@ class AvgSummaryGrid {
 		
 		if(sim.done){
 			let gatheringStr = (sim.time.gathering > 1000) ? timeFormat(sim.time.gathering/1000) : `${Math.round(sim.time.gathering)}ms`;
-			this.footers[0].textContent = `Done! Average time per floor ${timeFormat(sim.totals.t.avg)}`
-			this.footers[1].textContent = ` | Gathering: ${gatheringStr} | Finalizing: ${(Math.floor(sim.time.finalizing * 100) / 100).toFixed(2)}ms`;
+			this.footers[0].textContent = loc('mcs_calc_summary_done_time_a', [timeFormat(sim.totals.t.avg)]);
+			this.footers[1].textContent = loc('mcs_calc_summary_done_time_b', [gatheringStr, (Math.floor(sim.time.finalizing * 100) / 100).toFixed(2)]);
 			
 			this.slowestDiv.style = null;
 			if(bucket >= 0 && bucket < sim.nBuckets && sim.buckets.n[bucket] > 0){

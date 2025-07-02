@@ -1,40 +1,40 @@
 export const truncationOptions = [
 	{
-		short: 'Short',
-		full: 'Truncate weapon descriptions',
+		short: 'mcs_stng_truncate_t_short',
+		full: 'mcs_stng_truncate_t_full',
 		val: true
 	},
 	{
-		short: 'Full',
-		full: 'Show full descriptions',
+		short: 'mcs_stng_truncate_f_short',
+		full: 'mcs_stng_truncate_f_full',
 		val: false
 	},
 ];
 
 export const listSortingOptions = [
 	{
-		short: 'Disabled',
-		full: 'Disabled',
+		short: 'mcs_stng_disabled',
+		full: 'mcs_stng_disabled',
 		val: 0
 	},
 	{
-		short: 'Factor \u{03a3}',
-		full: 'Auto sort by factor',
+		short: 'mcs_stng_sorting_1_short',
+		full: 'mcs_stng_sorting_1_full',
 		val: 1
 	},
 	{
-		short: 'Rating #',
-		full: 'Auto sort by rating',
+		short: 'mcs_stng_sorting_2_short',
+		full: 'mcs_stng_sorting_2_full',
 		val: 2
 	},
 	{
-		short: 'Size',
-		full: 'Auto sort by size',
+		short: 'mcs_stng_sorting_3_short',
+		full: 'mcs_stng_sorting_3_full',
 		val: 3
 	},
 	{
-		short: 'Original',
-		full: 'Original order',
+		short: 'mcs_stng_sorting_4_short',
+		full: 'mcs_stng_sorting_4_full',
 		val: 4
 	},
 ];
@@ -54,18 +54,18 @@ export const sortingDirectionOptions = [
 
 export const listGroupingOptions = [
 	{
-		short: 'Disabled',
-		full: 'Disabled',
+		short: 'mcs_stng_disabled',
+		full: 'mcs_stng_disabled',
 		val: 0
 	},
 	{
-		short: 'Size',
-		full: 'Group by size',
+		short: 'mcs_stng_group_1_short',
+		full: 'mcs_stng_group_1_full',
 		val: 1
 	},
 	{
-		short: 'Chassis',
-		full: 'Group by chassis',
+		short: 'mcs_stng_group_2_short',
+		full: 'mcs_stng_group_2_full',
 		val: 2
 	},
 ];

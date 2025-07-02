@@ -235,9 +235,9 @@ function populateMenus(){
 	let truncateButton = $('#truncateSelector');
 	let truncateDropdown = $(truncateButton.next('.dropdownContent').get(0));
 	truncationOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`;
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`;
 		if(app.config.truncateWeapons == opt.val){
-			truncateButton.text(opt.short);
+			truncateButton.text(loc(opt.short));
 		};
 	});
 	truncateDropdown.append($(oHtml).on(
@@ -255,9 +255,9 @@ function populateMenus(){
 	let listSortingButton = $('#sortingSelector');
 	let listSortingDropdown = $(listSortingButton.next('.dropdownContent').get(0));
 	listSortingOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`
 		if(app.config.sortingType == opt.val){
-			listSortingButton.text(opt.short);
+			listSortingButton.text(loc(opt.short));
 		};
 	});
 	listSortingDropdown.append($(oHtml).on(
@@ -288,9 +288,9 @@ function populateMenus(){
 	let listGroupingButton = $('#groupingSelector');
 	let listGroupingDropdown = $(listGroupingButton.next('.dropdownContent').get(0));
 	listGroupingOptions.forEach(function(opt, i){
-		oHtml += `<a data-val="${i}">${opt.full}</a>`;
+		oHtml += `<a data-val="${i}">${loc(opt.full)}</a>`;
 		if(app.config.groupingType == opt.val){
-			listGroupingButton.text(opt.short);
+			listGroupingButton.text(loc(opt.short));
 		};
 	});
 	listGroupingDropdown.append($(oHtml).on(
@@ -593,22 +593,34 @@ function onFormInput(e){
 function bindLocaleStrings(){
 	$('[data-locale-string]').each((i, el)=>{
 		if(el.dataset.localeString)
-			switch(el.dataset.localeString){
-				case 'portal_spire_type':
-				case 'portal_spire_hazard':
-					let locString = loc(el.dataset.localeString);
-					locString = locString.split(/[:：]+/)[0];
-					locString = locString.split("：")[0];
-					$(el).text( locString );
-					break;
-				case 'portal_mech_size_small':
-					if(app.config.locale != 'en-US')
-						$(el).text( loc(el.dataset.localeString) + ' #' );
-					else
-						$(el).text( loc(el.dataset.localeString) + 's' );
-					break;
-				default:
-					$(el).text( loc(el.dataset.localeString) );
+			if(el.dataset.localeString.indexOf(',') !== -1){
+				let strings = el.dataset.localeString.split(',');
+				switch(strings[0]){
+					case 'i':
+						$(el).text( loc(strings[1]).toLowerCase() );
+						break;
+					default:
+						$(el).text( loc(strings[0], strings.slice(1).map((s)=>loc(s))) );
+				}
+			}
+			else{
+				switch(el.dataset.localeString){
+					case 'portal_spire_type':
+					case 'portal_spire_hazard':
+						let locString = loc(el.dataset.localeString);
+						locString = locString.split(/[:：]+/)[0];
+						locString = locString.split("：")[0];
+						$(el).text( locString );
+						break;
+					case 'portal_mech_size_small':
+						if(app.config.locale != 'en-US')
+							$(el).text( loc(el.dataset.localeString) + ' #' );
+						else
+							$(el).text( loc(el.dataset.localeString) + 's' );
+						break;
+					default:
+						$(el).text( loc(el.dataset.localeString) );
+				}
 			}
 	});
 }

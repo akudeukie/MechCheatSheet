@@ -11,7 +11,6 @@ reStrFile = re.compile(r'^strings\.[\w]{2}-[\w]{2}\.json$')
 reLocCode = re.compile(r'(\.[\w]{2}-[\w]{2})\.')
 locales = [re.search(reLocCode, f).group(1) for f in os.listdir('./default/') if re.match(reStrFile, f)]
 locales.append('')
-print(locales)
 
 if not path.isfile('used_strings.json'):
 	print("'used_strings.json' not found.\nCreate that file with a line write '{{ }}' if need.")
@@ -88,6 +87,6 @@ with open('used_strings.json', encoding='utf-8', newline='\n') as used_file, \
 			destination_file.seek(0,0)
 			destination_file.truncate(0)
 			json.dump(writing, destination_file, ensure_ascii=False, indent=2)
-	
-	print("wrote {} lines and {} locale files.".format(lineCount, len(locales)))
+			
+	print("Done. ||||  Wrote {} lines and {} locale files.".format(lineCount, len(locales)))
 	

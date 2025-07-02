@@ -767,7 +767,12 @@ class HeavyTitanPage extends MechListPage {
 		super(key, name, tvhList, id, false);
 		this.clearable = false;
 		
-		this.explainLine = $(hvtDescription);
+		this.explainLine = $('<div class="line smaller"><div class="text" id="hvtExplain"></div></div>');
+		
+		let spanTitan = `<span class="titan">${loc('portal_mech_size_titan')}</span>`;
+		let spanHeavy = `<span class="large">${loc('portal_mech_size_large')}</span>`;
+		let spanTargetting = `<i>${loc('portal_mech_equip_target')}</i>`;
+		this.explainLine.children('#hvtExplain').append(`<p>${loc('mcs_hvt_p1', [spanTitan, spanHeavy, spanTargetting])}</p>`).append(`<p>${loc('mcs_hvt_p2')}</p>`);
 	};
 	syncWithConstructor(){
 		if(!evolve.mech.size.standard.includes(mechConstructor.mech.size))
@@ -822,9 +827,6 @@ class HeavyTitanPage extends MechListPage {
 }
 
 const emptyListDud = (text) => `<div class="line smaller" ><div class="text"><span><i>&lt; ${text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")} &gt;</i></span></div></div>`;
-const hvtDescription = `<div class="line smaller"><div class="text" id="hvtExplain"><p><span class="titan">Titans</span> have higher raw firepower, but <span class="large">Heavy</span> mechs are more space efficient. 
-							On rare occasion, when weapon effectiveness against boss is way below 100%, <span class="titan">Titan</span> mechs can get ahead with the help of <i>${loc(`portal_mech_equip_target`)}</i> equipment.
-							This page is meant to illustrate that.</p><p>Loadouts are synced with the constructor.</p></div></div>`;
 
 var mechAllSizes = evolve.mech.size.standard.concat( evolve.mech.size.warlord );
 
