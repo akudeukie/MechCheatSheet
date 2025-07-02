@@ -47,7 +47,7 @@ export const mechPager = {
 		
 		mechPager.pages.length = app.maxMechPages;
 		for(var i = 0; i < mechPager.pages.length; i++){
-			let pName = (app.labels[i]) ? `P${i+1} | ${app.labels[i]}` : `Page ${i+1}`;
+			let pName = (app.labels[i]) ? `P${i+1} | ${app.labels[i]}` : `${loc('mcs_pager_page')} ${i+1}`;
 			mechPager.pages[i] = new MechListPage(i, pName, getMechList(i), i, true);
 			pageDropdown.append($(`<a data-val="${i}">${i+1}</a>`).on('click', {i: i}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 			pageContainer.append(mechPager.pages[i].dom);
@@ -56,14 +56,14 @@ export const mechPager = {
 			// .on('mouseenter', (e)=>{ if(e.target.dataset.val >= 0) { $('#pageLabelHover').text((app.labels[e.target.dataset.val]) ? app.labels[e.target.dataset.val] : `Page ${(parseInt(e.target.dataset.val) + 1)}`).show() } })
 			// .on('mouseleave', (e)=>{ $('#pageLabelHover').hide() });
 		
-		let hvtPage = new HeavyTitanPage('hvt', 'Heavy vs. Titan', [], false);
+		let hvtPage = new HeavyTitanPage('hvt', loc('mcs_pager_page_heavy_v_titan', [loc('portal_mech_size_large'), loc('portal_mech_size_titan')]), [], false);
 		mechPager.specialPages.push(hvtPage);
-		pageDropdown.append($(`<a class="fullSpan">${hvtPage.name}</a>`).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
+		pageDropdown.append($(`<a class="fullSpan"></a>`).text(hvtPage.name).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 		pageContainer.append(hvtPage.dom);
 		
 		let bayPage = new MechListPage('mechbay', loc('portal_mechbay_title'), global.portal.mechbay.mechs ?? [], -1, true);
 		mechPager.specialPages.push(bayPage);
-		pageDropdown.append($(`<a class="fullSpan">${bayPage.name}</a>`).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
+		pageDropdown.append($(`<a class="fullSpan"></a>`).text(bayPage.name).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 		pageContainer.append(bayPage.dom);
 		
 		app.on(app.EV_CLOSE_DROPDOWNS, mechPager.disarmClearList);
@@ -85,7 +85,7 @@ export const mechPager = {
 			mechPager.copied = true;
 			mechPager.copyPage = mechPager.currentPage;
 			mechPager.setPasteControls(mechPager.copyPage != mechPager.currentPage);
-			inform('info', 'Mech list copied');
+			inform('info', loc('mcs_info_page_copied'));
 		});
 		$('#pasteListConfirm').on('click', (e)=>{
 			if(mechPager.copyPage == mechPager.currentPage) return;
@@ -142,9 +142,9 @@ export const mechPager = {
 			if(mechPager.isVisible)
 				mechPager.pages[index].show();
 			mechPager.userLabel.attr('style', '');
-			mechPager.userLabel.attr('placeholder', `Page ${index+1}`);
+			mechPager.userLabel.attr('placeholder', `${loc('mcs_pager_page')} ${index+1}`);
 			mechPager.userLabel.val((app.labels[index]) ? app.labels[index] : '');
-			let pageDropdown = $($('#pageSelector').text((app.labels[index]) ? `P${index+1} | ${app.labels[index]}` : `Page ${index+1}`).next('.dropdownContent').get(0));
+			let pageDropdown = $($('#pageSelector').text((app.labels[index]) ? `P${index+1} | ${app.labels[index]}` : `${loc('mcs_pager_page')} ${index+1}`).next('.dropdownContent').get(0));
 			$(pageDropdown.children('a').toggleClass('current', false).get(index)).toggleClass('current', true);
 			mechPager.setCopyControls(mechPager.pages[index].mechList.length > 0);
 		}
@@ -277,7 +277,7 @@ export const mechPager = {
 		if(mechPager.currentPage < 0) return;
 		let val = e.target.value ? e.target.value : '';
 		app.labels[mechPager.currentPage] = val.trim().substring(0, 32);
-		mechPager.pages[mechPager.currentPage].name = (app.labels[mechPager.currentPage]) ? `P${mechPager.currentPage+1} | ${app.labels[mechPager.currentPage]}` : `Page ${mechPager.currentPage+1}`;
+		mechPager.pages[mechPager.currentPage].name = (app.labels[mechPager.currentPage]) ? `P${mechPager.currentPage+1} | ${app.labels[mechPager.currentPage]}` : `${loc('mcs_pager_page')} ${mechPager.currentPage+1}`;
 		saveLabels();
 		$('#pageSelector').text(mechPager.pages[mechPager.currentPage].name)
 		
@@ -302,7 +302,7 @@ export const mechPager = {
 		if(copiedPage.mechList.length == 0) return;
 		mechPager.saveMechList(toPage, copiedPage.mechList);
 		let currentPage = mechPager.pages[toPage];
-		inform('info', `Copied mech list from ${copiedPage.name} to ${currentPage.name}`);
+		inform('info', loc('mcs_info_page_pasted', [copiedPage.name, currentPage.name]));
 		
 		currentPage.mechList = getMechList(toPage);
 		setTimeout(()=>{
@@ -353,7 +353,7 @@ class MechListPage extends Page {
 		this.pageMeta.summaryDom.addEventListener('click', this.filter);
 		this.pageMeta.totals = Object.create(metaTotals);
 		
-		this.dudString = (key == 'mechbay')? mechbayListDud : emptyListDud;
+		this.dudString = emptyListDud( (key == 'mechbay') ? loc('mcs_pager_dud_mechbay') : loc('mcs_pager_dud_empty') );
 		this.delimiters = 0;
 		
 		if(key == 'mechbay')
@@ -491,7 +491,6 @@ class MechListPage extends Page {
 				if(chassisGrouping && attached){
 					newChassis = chassisSortingRatings[line.mech.chassis];
 					if(prevChassis >= 0 && prevChassis != newChassis){
-						let chStr = loc(`portal_mech_chassis_${this.lines[prevIndex].mech.chassis}`);
 						this.lines[prevIndex].dom.before(GroupDelimiter('portal_mech_chassis_', this.lines[prevIndex].mech.chassis, inGroup));
 						this.delimiters++;
 						inGroup = 1;
@@ -559,7 +558,6 @@ class MechListPage extends Page {
 					if(chassisGrouping){
 						newChassis = chassisSortingRatings[this.lines[i].mech.chassis];
 						if(prevChassis >= 0 && prevChassis != newChassis){
-							let chStr = loc(`portal_mech_chassis_${this.lines[prevIndex].mech.chassis}`);
 							this.pageMeta.dom.after(GroupDelimiter('portal_mech_chassis_', this.lines[prevIndex].mech.chassis, inGroup));
 							this.delimiters++;
 							inGroup = 1;
@@ -693,7 +691,7 @@ class MechListPage extends Page {
 	addMech(mech) {
 		//if(!this.shown) return;
 		if(!this.modifiable){
-			inform('error', 'This list can\'t be modified');
+			inform('error', loc('mcs_error_page_unmodifiable'));
 			return;
 		}
 		
@@ -814,7 +812,7 @@ class HeavyTitanPage extends MechListPage {
 		this.dom.append(this.explainLine);
 	};
 	addMech(mech) {
-		inform('error', 'This list can\'t be modified');
+		inform('error', loc('mcs_error_page_unmodifiable'));
 		return;
 	};
 	removeMech = (line)=>{
@@ -823,8 +821,7 @@ class HeavyTitanPage extends MechListPage {
 	
 }
 
-const emptyListDud = '<div class="line smaller" ><div class="text"><span><i>&lt; Mech list is empty &gt;</i></span></div></div>';
-const mechbayListDud = '<div class="line smaller" ><div class="text"><span><i>&lt; Import mech bay from a save game &gt;</i></span></div></div>';
+const emptyListDud = (text) => `<div class="line smaller" ><div class="text"><span><i>&lt; ${text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")} &gt;</i></span></div></div>`;
 const hvtDescription = `<div class="line smaller"><div class="text" id="hvtExplain"><p><span class="titan">Titans</span> have higher raw firepower, but <span class="large">Heavy</span> mechs are more space efficient. 
 							On rare occasion, when weapon effectiveness against boss is way below 100%, <span class="titan">Titan</span> mechs can get ahead with the help of <i>${loc(`portal_mech_equip_target`)}</i> equipment.
 							This page is meant to illustrate that.</p><p>Loadouts are synced with the constructor.</p></div></div>`;

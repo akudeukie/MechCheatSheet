@@ -202,7 +202,7 @@
 					</span>
 				</div>
 				<div class="spanBlock faded">
-					<span class="spanLabel">Info</span>
+					<span class="spanLabel" data-locale-string="mcs_lbl_info">Info</span>
 					<button id="showInfoTable" name="showInfoTable" value="" class="spanImpostor">?</button>
 				</div>
 			</div>
@@ -318,7 +318,7 @@
 				<div class="co2 rw2 blockContainer">
 					<div class="spanBlock">
 						<span class="spanLabel">&nbsp;</span>
-						<button id="cMechAdd" name="cMechAdd" value="" class="spanImpostor action">Add mech</button>
+						<button id="cMechAdd" name="cMechAdd" value="" class="spanImpostor action" data-locale-string="mcs_constructor_add_mech">Add mech</button>
 					</div>
 				</div>
 				<div class="co1 rw2 blockContainer">
@@ -376,11 +376,11 @@
 		
 			<div class="line smaller mgrid" id="mechListHeader">
 				<div class="co0 rw2 title">
-					<span class="spanLabel">Page
+					<span class="spanLabel"><span data-locale-string="mcs_pager_page">Page</span>
 						<a id="clearList" title="Delete all?" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#trash3"/></svg></a>
 						<div class="dropdownContent">
-							<a id="clearListArm" data-val="ask">Clear current page?</a>
-							<a id="clearListAbsolutely" class="inactive" data-val="confirm">Yes</a>
+							<a id="clearListArm" data-val="ask" data-locale-string="mcs_pager_delete_confirm1">Clear current page?</a>
+							<a id="clearListAbsolutely" class="inactive" data-val="confirm" data-locale-string="mcs_pager_delete_confirm2">Yes</a>
 						</div>
 						<a id="copyList" class="clickable " title="Copy" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#copy"/></svg></a>
 						<a id="pasteList" class="clickable dropdownButton" title="Paste" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#journal-arrow-down"/></svg></a>
@@ -413,7 +413,7 @@
 				></div
 				><div class="co2 rw2 blockContainer">
 					<div class="spanBlock">
-						<span class="spanLabel">Sorting</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_sorting">Sorting</span>
 						<button id="sortingSelector"  aria-label="Sorting type" name="sortingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
 						<div class="dropdownContent">
 						
@@ -424,25 +424,25 @@
 						<button id="sortingDirection" aria-label="Sorting direction" name="sortingDirection" value="" class="spanImpostor">&darr;</button>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Grouping</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_grouping">Grouping</span>
 						<button id="groupingSelector"  aria-label="Grouping type" name="groupingSelector" value="" class="spanImpostor dropdownButton">Disabled</button>
 						<div class="dropdownContent">
 						
 						</div>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Descriptions</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_descriptions">Descriptions</span>
 						<button id="truncateSelector" name="truncateSelector" value="" class="spanImpostor dropdownButton">Yes</button>
 						<div class="dropdownContent">
 						
 						</div>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Style</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_style">Style</span>
 						<button id="visStyleSwitch" aria-label="Number visual font style" name="visStyleSwitch" value="" class="spanImpostor">A</button>
 					</div>
 					<div class="spanBlock">
-						<span class="spanLabel">Calc&nbsp;</span>
+						<span class="spanLabel" data-locale-string="mcs_pager_lbl_calc">Calc&nbsp;</span>
 						<button id="openCalculator" aria-label="Open/close calculator" name="openCalculator" value="" class="spanImpostor">
 							<svg class="bi" width="1.1em" height="1.1em" fill="currentColor">
 								<use xlink:href="./icons/icons.svg#calculator"/>
@@ -492,26 +492,26 @@
 				</div>
 				<form id="avgSimForm" class="blockContainer">
 					<div class="spanBlock">
-						<label for="avgStart" class="spanLabel">Starting from floor</label>
+						<label for="avgStart" class="spanLabel" data-locale-string="mcs_calc_lbl_start">Starting from floor</label>
 						<input id="avgStart" data-field="avgStart" type="number" value="1" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
-						<label for="avgLength"  class="spanLabel">Run for [ x ] floors</label>
+						<label for="avgLength"  class="spanLabel" data-locale-string="mcs_calc_lbl_length">Run for [ x ] floors</label>
 						<input id="avgLength" data-field="avgLength" type="number" value="20" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
-						<label for="avgRepeats" class="spanLabel">Repeat this many times</label>
+						<label for="avgRepeats" class="spanLabel" data-locale-string="mcs_calc_lbl_repeats">Repeat this many times</label>
 						<input id="avgRepeats" data-field="avgRepeats" type="number" value="10" min="1" class="spanImpostor"></input>
 					</div>
 					<div class="spanBlock">
 						<span class="spanLabel"><progress id="simProgress" name="simProgress" value="5" max="100"class="spanImpostor">33%</progress></span>
-						<button id="avgDoIt" name="avgDoIt" value="" class="spanImpostor action">Do it!</button>
+						<button id="avgDoIt" name="avgDoIt" value="" class="spanImpostor action" data-locale-string="mcs_calc_btn_doit">Do it!</button>
 					</div>
 					<div class="spanBlock">
 					</div>
 					<div class="spanBlock helpful pophover">
 						<label for="avgPrecise" id="avgPreciseLabel" class="checkLabel">
-							<span class="spanLabel">Precise medians</span>
+							<span class="spanLabel" data-locale-string="mcs_calc_lbl_precise_medians">Precise medians</span>
 							<input id="avgPrecise" name="avgPrecise" data-field="preciseMedians" type="checkbox" class="spanImpostor"></input>
 						</label>
 						<div class="popbox">
@@ -535,7 +535,7 @@
 						</div>
 					</div>
 					<div class="spanBlock">
-						<label for="avgThreads" class="spanLabel">Threads / workers</label>
+						<label for="avgThreads" class="spanLabel" data-locale-string="mcs_calc_lbl_threads">Threads / workers</label>
 						<input id="avgThreads" data-field="avgThreads" type="number" value="4" min="1" max="16" class="spanImpostor"></input>
 					</div>
 				</form>

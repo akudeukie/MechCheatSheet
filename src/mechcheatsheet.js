@@ -42,11 +42,11 @@ export function importSaveString(){
 			let errors = 0;
 	
 			if(!global.portal?.mechbay) {
-				inform('error', 'Mechbay was not found');
+				inform('error', loc('mcs_error_nomechbay'));
 				errors++;
 			}
 			if(!global.portal?.spire){
-				inform('error', 'Spire was not found');
+				inform('error', loc('mcs_error_nospire'));
 				errors++;
 				initData();
 				
@@ -95,17 +95,17 @@ export function importSaveString(){
 			}, 0);
 			
 			if(errors == 0) 
-				inform('success', 'Import was successful');
+				inform('success', loc('mcs_success_import'));
 			
 		}
 		else {
-			inform('error', 'Invalid input string');
+			inform('error', loc('mcs_error_invalid_str'));
 		}
 		
 		importData = null;
 	}
 	else {
-		inform('error', 'Input string is empty');
+		inform('error', loc('mcs_error_empty_str'));
 	}
 	visual.update.calcEdenTax();
 }
@@ -461,7 +461,7 @@ function pickBoss(e){
 function pickStatus(e){
 	let status = e.currentTarget.dataset.val
 	if(status && global.portal.spire?.status && global.portal.spire.status[status] == true){
-		inform('info', 'Hazard is already present');
+		inform('info', loc('mcs_info_hazard_present'));
 		return;
 	}
 	
@@ -558,7 +558,7 @@ export function inform(type, info, id, actions = []){
 	
 	if(id && $(`#${id}`).length > 0) return;
 	
-	let msgb = $(`<div class="${type}"${(id)? `id="${id}"` : ''}>${info}</div>`);
+	let msgb = $(`<div class="${type}"${(id)? `id="${id}"` : ''}></div>`).text(info);
 	$('#messageBox').append(msgb);
 	setTimeout(()=>{msgb.fadeOut(500, ()=>{msgb.remove()})}, timeout);
 }
@@ -843,6 +843,6 @@ var goTopThreshold = 160;
 	initEvents();
 	
 	if(!app.localStorage)
-		inform('error', 'Local Storage is not available');
+		inform('error', loc('mcs_error_lstorage'));
 	
 })();

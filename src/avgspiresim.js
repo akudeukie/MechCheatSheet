@@ -125,11 +125,11 @@ export const avgCalc = {
 			for(var i = 0; i < avgCalc.workers.length; i++){
 				avgCalc.workers[i].postMessage({'a': 'stop'});
 			}
-			$('#avgDoIt').text('Do it!');
+			$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 			return;
 		}
 		else{
-			$('#avgDoIt').text('Stop');
+			$('#avgDoIt').text(loc('mcs_calc_btn_stop'));
 			avgCalc.running = true;
 		}
 		
@@ -249,23 +249,26 @@ export const avgCalc = {
 					avgCalc.showSim(avgCalc.runningSim);
 					//avgCalc.summarizer.summarize( avgCalc.sims[avgCalc.runningSim] );
 					avgCalc.running = false;
-					$('#avgDoIt').text('Do it!');
+					$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 				}
 				break;
 			case 'error':
+				let errmsg;
 				switch(e.data['error']){
 					case 'no_mechs':
-						avgCalc.sims[avgCalc.runningSim].descriptor = 'Where are the mechs?';
-						inform('info', 'Where are the mechs?', 'sim_no_mechs');
+						errmsg = loc('mcs_info_no_mechs');
+						avgCalc.sims[avgCalc.runningSim].descriptor = errmsg;
+						inform('info', errmsg, 'sim_no_mechs');
 						break;
 					case 'mechs_busy':
-						avgCalc.sims[avgCalc.runningSim].descriptor = `All mechs are busy in ${loc('tab_eden')}`;
-						inform('info', `All mechs are busy in ${loc('tab_eden')}`, 'sim_eden');
+						errmsg = loc('mcs_stuck_in_eden', [loc('tab_eden')]);
+						avgCalc.sims[avgCalc.runningSim].descriptor = errmsg;
+						inform('info', errmsg, 'sim_eden');
 						break;
 				}
 				//avgCalc.sims[avgCalc.runningSim].done = true;
 				avgCalc.running = false;
-				$('#avgDoIt').text('Do it!');
+				$('#avgDoIt').text(loc('mcs_calc_btn_doit'));
 				avgCalc.summarizer.summarize( avgCalc.sims[avgCalc.runningSim] );
 				avgCalc.summarizer.clear();
 				break;
@@ -838,7 +841,7 @@ class AvgSummaryGrid {
 		let eHeader = document.createElement('div');
 		eHeader.className = `co0 header`;
 		eHeader.appendChild(medianCanvases[0]);
-		eHeader.appendChild(document.createTextNode('Efficiency'));
+		eHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_effi')));
 		
 		this.statDiv.appendChild(eHeader);
 		Object.keys(new Datum()).forEach(function(key, i){
@@ -856,11 +859,11 @@ class AvgSummaryGrid {
 		
 		this.bHeader = document.createElement('div');
 		this.bHeader.className = `co0 bucket`;
-		this.bHeader.appendChild(document.createTextNode('Total'));
+		this.bHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_total')));
 		let tHeader = document.createElement('div');
 		tHeader.className = `co0 header`;
 		tHeader.appendChild(medianCanvases[1]);
-		tHeader.appendChild(document.createTextNode('Time'));
+		tHeader.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_time')));
 		
 		this.statDiv.appendChild(this.bHeader);
 		this.statDiv.appendChild(tHeader);
@@ -884,7 +887,7 @@ class AvgSummaryGrid {
 		
 		let slowestTitle = document.createElement('span');
 		slowestTitle.className = 'label';
-		slowestTitle.appendChild(document.createTextNode('Slowest floor:'));
+		slowestTitle.appendChild(document.createTextNode(loc('mcs_calc_summary_lbl_slowest_floor')));
 		this.slowestDiv.appendChild(slowestTitle);
 		
 		for(let i = 0; i < 2; i++){
@@ -959,7 +962,7 @@ class AvgSummaryGrid {
 				}
 			}
 			else{
-				this.bHeader.textContent = 'Total';
+				this.bHeader.textContent = loc('mcs_calc_summary_lbl_total');
 				effBucket = sim.totals.e;
 				timeBucket = sim.totals.t;
 			}

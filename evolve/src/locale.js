@@ -3,7 +3,7 @@ let strings;
 getString(global.settings.locale);
 export var usedLoc = {};
 export function loc(key, variables) {
-  //usedLoc[key] = true;
+  //if(!key.startsWith('mcs_')) usedLoc[key] = true;
   let string = strings[key];
   if (!string) {
     if (global.settings.expose) {
