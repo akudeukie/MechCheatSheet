@@ -593,36 +593,44 @@ function onFormInput(e){
 function bindLocaleStrings(){
 	$('[data-locale-string]').each((i, el)=>{
 		if(el.dataset.localeString)
-			if(el.dataset.localeString.indexOf(',') !== -1){
-				let strings = el.dataset.localeString.split(',');
-				switch(strings[0]){
-					case 'i':
-						$(el).text( loc(strings[1]).toLowerCase() );
-						break;
-					default:
-						$(el).text( loc(strings[0], strings.slice(1).map((s)=>loc(s))) );
-				}
-			}
-			else{
-				switch(el.dataset.localeString){
-					case 'portal_spire_type':
-					case 'portal_spire_hazard':
-						let locString = loc(el.dataset.localeString);
-						locString = locString.split(/[:：]+/)[0];
-						locString = locString.split("：")[0];
-						$(el).text( locString );
-						break;
-					case 'portal_mech_size_small':
-						if(app.config.locale != 'en-US')
-							$(el).text( loc(el.dataset.localeString) + ' #' );
-						else
-							$(el).text( loc(el.dataset.localeString) + 's' );
-						break;
-					default:
-						$(el).text( loc(el.dataset.localeString) );
-				}
-			}
+			$(el).text( getLocaleString(el.dataset.localeString) );
 	});
+	$('[data-locale-title]').each((i, el)=>{
+		if(el.dataset.localeTitle)
+			$(el).attr( 'title', getLocaleString(el.dataset.localeTitle) );
+	});
+}
+
+function getLocaleString(binding){
+	if(binding.indexOf(',') !== -1){
+		let strings = binding.split(',');
+		switch(strings[0]){
+			case 'i':
+				return loc(strings[1]).toLowerCase();
+				break;
+			default:
+				return loc(strings[0], strings.slice(1).map((s)=>loc(s)));
+		}
+	}
+	else{
+		switch(binding){
+			case 'portal_spire_type':
+			case 'portal_spire_hazard':
+				let locString = loc(binding);
+				locString = locString.split(/[:：]+/)[0];
+				locString = locString.split("：")[0];
+				return locString;
+				break;
+			case 'portal_mech_size_small':
+				if(app.config.locale != 'en-US')
+					return loc(binding) + ' #';
+				else
+					return loc(binding) + 's';
+				break;
+			default:
+				return loc(binding);
+		}
+	}
 }
 
 function initDropdowns(){

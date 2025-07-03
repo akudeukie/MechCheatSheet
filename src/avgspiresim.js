@@ -53,8 +53,8 @@ export const avgCalc = {
 		
 		avgCalc.canvas.e.c.setAttribute('aria-label', 'Efficiency graph');
 		avgCalc.canvas.t.c.setAttribute('aria-label', 'Time graph');
-		avgCalc.canvas.emed.c.setAttribute('title', 'Approximate efficiency distribution');
-		avgCalc.canvas.tmed.c.setAttribute('title', 'Approximate completion time distribution');
+		avgCalc.canvas.emed.c.setAttribute('title', loc('mcs_calc_effi_med_graph'));
+		avgCalc.canvas.tmed.c.setAttribute('title', loc('mcs_calc_time_med_graph'));
 		
 		avgCalc.summarizer = new AvgSummaryGrid([ avgCalc.canvas.e.c, avgCalc.canvas.t.c ], [ avgCalc.canvas.emed.c, avgCalc.canvas.tmed.c ]);
 		
@@ -909,7 +909,7 @@ class AvgSummaryGrid {
 			}
 			this.slowest[i].col[2].textContent = '\u{1F845}';
 			this.slowest[i].col[2].classList.add('spanImpostor');
-			this.slowest[i].col[2].title = 'Load up floor config into cheat sheet';
+			this.slowest[i].col[2].setAttribute('title', loc('mcs_calc_load_up'));
 			this.slowest[i].col[2].dataset.key = (i == 0) ? 'e' : 't';
 			this.slowest[i].col[2].addEventListener('click', avgCalc.loadUpFloorum);
 		}
