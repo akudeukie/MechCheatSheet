@@ -516,7 +516,7 @@ class MechListPage extends Page {
 		// Page meta updates
 		if(calc){
 			this.pageMeta.factors.applyValues();
-			this.pageMeta.factors['ar'].dom.title = `Total raw unadjusted rating: ${numFormat.format(Math.round(this.pageMeta.factors['rr'].val * 1000 * global.portal.spire.count))}`;
+			this.pageMeta.factors['ar'].dom.setAttribute('title', `${loc('mcs_pager_total_raw_rate')}: ${numFormat.format(Math.round(this.pageMeta.factors['rr'].val * 1000 * global.portal.spire.count))}`);
 			let etaSummary = (`ET [` + ((this.pageMeta.factors['rr']?.val)? timeFormat(100 / (this.pageMeta.factors['rr'].val)) : timeFormat(-1)) + `]`);
 			if(this.key == 'mechbay'){	
 				let spaceSpan = document.createElement('span');
@@ -936,7 +936,7 @@ class MetaLine {
 		this.spaceDom = document.createElement('span');
 		this.summaryDom = document.createElement('span');
 		this.summaryDom.className = 'summary';
-		this.summaryDom.setAttribute('title', 'Filter mech display');
+		this.summaryDom.setAttribute('title', loc('mcs_pager_filter'));
 		title.appendChild(this.spaceDom);
 		title.appendChild(this.summaryDom);
 						
