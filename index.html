@@ -100,13 +100,13 @@
 			</div>
 		</div>
 		<div id="localeBox">
-			<button id="localeButton" name="localeButton" value="" class="spanImpostor dropdownButton" title="Language">&#x1F30D;</button>
+			<button id="localeButton" name="localeButton" value="" class="spanImpostor dropdownButton" data-locale-title="mcs_language">&#x1F30D;</button>
 			<div class="dropdownContent">
 				
 			</div>
 		</div>
 		<div id="bottomFloater">
-			<button id="goToTop" name="goToTop" value="" class="spanImpostor action" title="Scroll to top of the page">&#x1F845;</button>
+			<button id="goToTop" name="goToTop" value="" class="spanImpostor action" data-locale-title="mcs_scroll_top">&#x1F845;</button>
 		</div>
 	</section>
 	<section>
@@ -214,19 +214,19 @@
 			<div class="spanBlock">
 				<span class="spanLabel" data-locale-string="portal_spire_type">Terrain</span>
 				<div id="terrainTable" class="simpleTable">
-					<a>-Chassis-</a>
+					<a>-<span data-locale-string="mcs_info_chassis">Chassis</span>-</a>
 				</div>
 			</div>
 			<div class="spanBlock">
 				<span class="spanLabel" data-locale-string="governor_criminal_t1">Boss</span>
 				<div id="resistanceTable" class="simpleTable">
-					<a>-Boss resistances-</a>
+					<a>-<span data-locale-string="mcs_info_monst_resist">Boss resistances</span>-</a>
 				</div>
 			</div>
 			<div class="spanBlock">
 				<span class="spanLabel" data-locale-string="portal_mech_equipment">Equipment</span>
 				<div id="equipmentTable" class="simpleTable">
-					<a>-Equipment-</a>
+					<a>-<span data-locale-string="portal_mech_equipment">Equipment</span>-</a>
 				</div>
 			</div>
 		</div>
@@ -377,13 +377,13 @@
 			<div class="line smaller mgrid" id="mechListHeader">
 				<div class="co0 rw2 title">
 					<span class="spanLabel"><span data-locale-string="mcs_pager_page">Page</span>
-						<a id="clearList" title="Delete all?" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#trash3"/></svg></a>
+						<a id="clearList" data-locale-title="mcs_pager_delete_all" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#trash3"/></svg></a>
 						<div class="dropdownContent">
 							<a id="clearListArm" data-val="ask" data-locale-string="mcs_pager_delete_confirm1">Clear current page?</a>
 							<a id="clearListAbsolutely" class="inactive" data-val="confirm" data-locale-string="mcs_pager_delete_confirm2">Yes</a>
 						</div>
-						<a id="copyList" class="clickable " title="Copy" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#copy"/></svg></a>
-						<a id="pasteList" class="clickable dropdownButton" title="Paste" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#journal-arrow-down"/></svg></a>
+						<a id="copyList" class="clickable " data-locale-title="mcs_pager_copy" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#copy"/></svg></a>
+						<a id="pasteList" class="clickable dropdownButton"  data-locale-title="mcs_pager_paste" style="display: none"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#journal-arrow-down"/></svg></a>
 						<div class="dropdownContent">
 							<a id="pasteListConfirm" data-val="ask">Paste mech list here <span class="success">&#x2714;</span></a>
 							<a id="pasteListClear" data-val="ask">Clear clipboard &#x1F7AD;</a>
@@ -406,10 +406,10 @@
 					</div>
 				</div>
 				<div class="co1 rw2 blockContainer"
-					><div class="spanBlock stat" title="Terrain + hazard effect">&#x26F0;&#xFE0F;&#x1F332;</div
-					><div class="spanBlock stat" title="Weapon effectivness">&#x1F4A5;</div
-					><div class="spanBlock stat sco2 clickable" title="Total effectivness" id="totalEffectHeader">&Sigma;</div
-					><div class="spanBlock stat sco3 clickable" title="Adjusted final rating" id="finalRatingHeader">#</div
+					><div class="spanBlock stat" data-locale-title="mcs_con_tefactor">&#x26F0;&#xFE0F;&#x1F332;</div
+					><div class="spanBlock stat" data-locale-title="mcs_con_wefactor">&#x1F4A5;</div
+					><div class="spanBlock stat sco2 clickable" data-locale-title="mcs_con_sufactor" id="totalEffectHeader">&Sigma;</div
+					><div class="spanBlock stat sco3 clickable" data-locale-title="mcs_con_adfactor" id="finalRatingHeader">#</div
 				></div
 				><div class="co2 rw2 blockContainer">
 					<div class="spanBlock">
