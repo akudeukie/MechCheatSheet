@@ -510,7 +510,7 @@ function pickPagerOption(e){
 	let newVal = e.data.optionList[e.currentTarget.dataset.val].val;
 	
 	if(newVal != app.config[e.data.optionConfig]){
-		$(e.data.optionSelector).text(e.data.optionList[e.currentTarget.dataset.val].short).val(newVal);
+		$(e.data.optionSelector).text(loc(e.data.optionList[e.currentTarget.dataset.val].short)).val(newVal);
 		app.config[e.data.optionConfig] = newVal;
 		saveConfig();
 		
