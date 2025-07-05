@@ -752,6 +752,9 @@ a.current,
 	bottom:-5px;
 	left: 1.25rem;
 }
+#listJson {
+	float: left;
+}
 #clearList, #copyList, #pasteList {
 	float: right;
 }
@@ -998,11 +1001,15 @@ a.current,
 #pageUserLabel:focus {
 	box-shadow: inset 0 0 5px 0px #eeeeee7a;
 }
+#listJsonString,
 #pageUserLabel {
 	margin-bottom: 0.2rem;
 	border-width: 0;
 	background-color: #333;
 	color: #eee;
+}
+#listJsonForm button {
+	text-align: left;
 }
 #mechLists .line {
 	align-items: stretch;

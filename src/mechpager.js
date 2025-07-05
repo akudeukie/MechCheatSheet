@@ -67,6 +67,19 @@ export const mechPager = {
 		pageContainer.append(bayPage.dom);
 		
 		app.on(app.EV_CLOSE_DROPDOWNS, mechPager.disarmClearList);
+		app.on(app.EV_OPEN_DROPDOWN, (e)=>{ $('#listJsonString').val('') });
+		
+		let listJsonInput = $('#listJsonString').on('click', (e)=>{ e.stopPropagation() }).on('focus', (e)=>{ e.target.select(); });;
+		$('#listJsonExport').on('click', (e)=>{
+			e.stopPropagation();
+			$('#listJsonString').val( JSON.stringify(mechPager.getCurrentList()) ).select();
+			document.execCommand("copy");
+		});
+		
+		$('#listJsonForm').on('submit', (e)=>{
+			e.preventDefault();
+			mechPager.importJSONList();
+		});
 		
 		let deleteConfirmContainer = $($('#clearList').next('.dropdownContent').get(0));
 		deleteConfirmContainer.on('click', (e)=>{ e.stopPropagation() });
@@ -311,8 +324,60 @@ export const mechPager = {
 			currentPage.update(isSpireSetup());
 		}, 0);
 	},
+	importJSONList(){
+		let newList = parseMechListJSON($('#listJsonString').val());
+		if(newList.length > 0){
+			// Set new mech list
+			let currentPage = mechPager.getCurrent();
+			if(currentPage && currentPage.modifiable){
+				inform('success', loc('mcs_success_import'));
+				
+				mechPager.saveMechList(mechPager.currentPage, newList);
+				currentPage.mechList = getMechList(mechPager.currentPage);
+				setTimeout(()=>{
+					currentPage.hide();
+					currentPage.show();
+					currentPage.update(isSpireSetup());
+				}, 0);
+			}
+			else{
+				inform('error', loc('mcs_error_page_unmodifiable'));
+			}
+		}
+		else{
+			$('#listJsonString').val('');
+			inform('error', loc('mcs_error_invalid_str'));
+		}
+	},
 	
 };
+
+function parseMechListJSON(input){
+	let list = [];
+	try{
+		list = JSON.parse(input);
+	}
+	catch(e){
+		return [];
+	}
+	
+	if( !Array.isArray(list) ) return [];
+	
+	let isValid = true;
+	for(var i = 0; i < list.length && isValid; i++){
+		isValid = isValid 
+				&& list[i].hasOwnProperty('size')
+				&& list[i].hasOwnProperty('hardpoint')
+				&& list[i].hasOwnProperty('chassis')
+				&& list[i].hasOwnProperty('equip')
+				&& list[i].hasOwnProperty('infernal')
+				&& Array.isArray(list[i].hardpoint)
+				&& Array.isArray(list[i].equip);
+	}
+	
+	if(isValid)	return list;
+	else return [];
+}
 
 export class Page {
 	shown = false;
