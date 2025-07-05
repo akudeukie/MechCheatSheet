@@ -644,6 +644,7 @@ function initDropdowns(){
 		let rect = thisContent.getBoundingClientRect();
 		let dx = (rect.x + rect.width - document.body.getBoundingClientRect().width);
 		$(thisContent).toggleClass('right', dx > 0);
+		app.dispatchEvent(app.EV_OPEN_DROPDOWN);
 	});
 	$('.dropdownContent.popbox').on('click', (e)=>{
 		e.stopPropagation();

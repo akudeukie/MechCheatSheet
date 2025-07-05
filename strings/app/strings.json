@@ -1,4 +1,6 @@
 {
+  "mcs_export": "Export",
+  "mcs_import": "Import",
   "mcs_language": "Language",
   "mcs_scroll_top": "Scroll to top of the page",
   "mcs_lbl_info": "Info",
@@ -44,6 +46,7 @@
   "mcs_pager_page": "Page",
   "mcs_pager_copy": "Copy",
   "mcs_pager_paste": "Paste",
+  "mcs_pager_json": "JSON string",
   "mcs_pager_delete_all": "Delete all?",
   "mcs_pager_delete_confirm1": "Clear current page?",
   "mcs_pager_delete_confirm2": "Yes",

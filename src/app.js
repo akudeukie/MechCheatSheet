@@ -49,6 +49,7 @@ export const app = {
 	
 	events: {},
 	EV_CONSTRUCTOR: 'eon_constructor',
+	EV_OPEN_DROPDOWN: 'eon_openedropdown',
 	EV_CLOSE_DROPDOWNS: 'eon_closedropdowns',
 
 	on: function(event, callback) {
