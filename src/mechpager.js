@@ -333,7 +333,7 @@ export const mechPager = {
 				inform('success', loc('mcs_success_import'));
 				
 				mechPager.saveMechList(mechPager.currentPage, newList);
-				currentPage.mechList = getMechList(mechPager.currentPage);
+				currentPage.mechList = (mechPager.currentPage < 0) ? newList : getMechList(mechPager.currentPage);
 				setTimeout(()=>{
 					currentPage.hide();
 					currentPage.show();
