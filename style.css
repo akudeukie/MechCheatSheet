@@ -2,7 +2,7 @@
 	font-family: "Segoe UI", Roboto,  Arial, sans-serif;
 	color: #eee;
 	background-color: #282525;
-	margin-top: 0;
+	margin: 0 8px 8px 8px;
 }
 .popbox {
 	font-family: "Segoe UI", Roboto,  Arial, sans-serif;
@@ -485,10 +485,18 @@ a.current,
 		grid-column: 2 / span 2;
 		margin-left: 0;
 	}
+	.vlist .line {
+		width: calc(100% - 16px);
+	}
 }
 @media (min-width: 961px) {
 	#mechConstructor {
 		min-width: 48rem;
+	}
+	.vlist .line {
+		width: max-content;
+		min-width: 56rem;
+		max-width: calc(100% - 16px);
 	}
 }
 .co0 {
@@ -852,6 +860,10 @@ a.current,
 	gap: 0.5rem;
 	cursor: pointer;
 }
+.checkLabel:hover {
+	color: #ffc107;
+}
+#listVirtualLabel,
 #avgEdenTaxLabel,
 #avgPreciseLabel {
 	cursor: help;
@@ -868,6 +880,16 @@ a.current,
 	left: initial;
 	right: -5px;
 	bottom: 5px;
+}
+
+#listVirtualLabel + .popbox {
+	left: 105%;
+	bottom: initial;
+	top: -5%;
+}
+#listVirtualLabel + .popbox > .arrow {
+	left: -5px;
+	top: 5px;
 }
 
 .emannuelWrap {
@@ -1069,22 +1091,36 @@ a.current,
 	min-width: 8.6rem;
 }
 
-.mcLn .title sup {
-	line-height: 0;
-	/*color: #ff8a65;*/
+.vlist {
+	justify-self: stretch;
+}
+.mpage-cont {
+	position: relative;
+}
+.mpage-cont .mcLn {
+	position: absolute;
 }
 .mcLn.delimiter {
 	padding: 0.5rem 0.4rem;
-	font-size: 0.9em;
+	font-size: 1.2em;
 	font-style: italic;
 	font-weight: bold;
 	text-transform: uppercase;
 	color: #999;
 	background-image: linear-gradient(90deg, #444444, transparent 10rem);
 }
+.mcLn .title sup {
+	line-height: 0;
+}
+#mechLists:not(.prepared-3) .vlist .infernal .title .mcCls:after,
 #mechLists:not(.prepared-3) .title sup {
 	color: #000 !important;
-	/*display: none;*/
+}
+.vlist .infernal .title .mcCls:after {
+	content: "Inf";
+	line-height: 0;
+	font-size: 0.8em;
+	vertical-align: super;
 }
 
 #mechConstructor .spanImpostor[value="titan"],

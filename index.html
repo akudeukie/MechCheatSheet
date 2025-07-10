@@ -377,13 +377,26 @@
 			<div class="line smaller mgrid" id="mechListHeader">
 				<div class="co0 rw2 title">
 					<span class="spanLabel"><span data-locale-string="mcs_pager_page">Page</span>
-						<a id="listJson" data-locale-title="mcs_pager_json" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#filetype-json"/></svg></a>
-						<form id="listJsonForm" class="dropdownContent">
-							<label for="listJsonString" data-locale-string="mcs_pager_json" class="spanLabel">JSON string</label>
-							<input id="listJsonString" type="text"></input>
-							<a id="listJsonExport" class="spanImpostor" data-val="export" data-locale-string="mcs_export">Export</a>
-							<button class="spanImpostor" data-val="import" data-locale-string="mcs_import" form="listJsonForm" type="submit">Import</button>
-						</form>
+						<a id="listJson" data-locale-title="mcs_pager_json" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#gear-fill"/></svg></a>
+						<div class="dropdownContent">
+							<form id="listJsonForm" class="">
+								<label for="listJsonString" data-locale-string="mcs_pager_json" class="spanLabel">JSON string</label>
+								<input id="listJsonString" type="text"></input>
+								<a id="listJsonExport" class="spanImpostor" data-val="export" data-locale-string="mcs_export">Export</a>
+								<button class="spanImpostor" data-val="import" data-locale-string="mcs_import" form="listJsonForm" type="submit">Import</button>
+							</form>
+							<div class="spanBlock helpful pophover">
+								<label for="virtualList" id="listVirtualLabel" class="checkLabel helpful pophover">
+									<span class="spanLabel" data-locale-string="mcs_pager_lbl_virtual">Virtual list</span>
+									<input id="virtualList" name="virtualList" data-field="virtualList" type="checkbox" class="spanImpostor"></input>
+								</label>
+								<div class="popbox">
+									<h3 data-locale-string="mcs_pager_lbl_virtual">Virtual list</h3>
+									<p data-locale-string="mcs_pager_virtual_a"></p>
+									<div class="arrow" data-popper-arrow></div>
+								</div>
+							</div>
+						</div>
 						<a id="clearList" data-locale-title="mcs_pager_delete_all" class="clickable dropdownButton"><svg class="bi" width="1.2rem" height="1.2rem" fill="currentColor"><use xlink:href="./icons/icons.svg#trash3"/></svg></a>
 						<div class="dropdownContent">
 							<a id="clearListArm" data-val="ask" data-locale-string="mcs_pager_delete_confirm1">Clear current page?</a>
@@ -555,6 +568,6 @@
 			
 		</div>
 	</section>
-	<section id="messageBox"></section>
+	<section id="messageBox"><!-- <div id="debug_box" class="info"></div> --></section>
 </body>
 </html>

@@ -42,6 +42,7 @@ export const app = {
 		avgEdenTax: true,
 		pagerVisibility: 0,
 		defaultPage: 0,
+		virtualList: true,
 		locale: 'en-US'
 	},
 	labels: {},
@@ -249,6 +250,18 @@ function pageToBucket(pageNumber){
 
 function bucketToPage(bucket){
 	return bucket.i * app.maxMechBuckets + bucket.b;;
+}
+
+export function throttle(fn, limit){
+	let timer = null;
+	return function(...args){
+		if(timer === null){
+			fn(...args);
+			timer = setTimeout(()=>{
+				timer = null;
+			}, limit);
+		}
+	}
 }
 
 let storage;

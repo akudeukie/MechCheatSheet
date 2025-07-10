@@ -60,6 +60,8 @@
   "mcs_pager_dud_mechbay": "Import mech bay from a save game",
   "mcs_pager_filter": "Filter mech display",
   "mcs_pager_total_raw_rate": "Total raw unadjusted rating",
+  "mcs_pager_lbl_virtual": "List virtualization",
+  "mcs_pager_virtual_a": "Enables list virtualization to help improve responsiveness of giant mech lists (over 200+). Requires reloading.",
   "mcs_calc_lbl_start": "Starting from floor",
   "mcs_calc_lbl_length": "Run for [ x ] floors",
   "mcs_calc_lbl_repeats": "Repeat this many times",
