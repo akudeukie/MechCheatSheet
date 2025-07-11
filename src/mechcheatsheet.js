@@ -1,4 +1,4 @@
-import { app, initData, saveConfig, throttle } from './app.js';
+import { app, initData, saveConfig, debounce } from './app.js';
 
 import { global, setGlobal } from '../evolve/src/vars.js';
 import { statusEffect, monsters } from '../evolve/src/portal.js';
@@ -757,7 +757,7 @@ function initEvents() {
 	}).get(0);
 	//goTopButton.hide();
 	//goTopThreshold = 10 * parseFloat(getComputedStyle(document.documentElement).fontSize);
-	$(window).on('scroll', throttle((e)=>{
+	$(window).on('scroll', debounce((e)=>{
 		//if (document.body.scrollTop < goTopThreshold && document.documentElement.scrollTop < goTopThreshold)
 		if (window.scrollY < goTopThreshold)
 			goTopButton.style = null;

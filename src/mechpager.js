@@ -431,6 +431,9 @@ class MechVirtualListPage extends Page {
 		
 		this.dudString = emptyListDud( (key == 'mechbay') ? loc('mcs_pager_dud_mechbay') : loc('mcs_pager_dud_empty') );
 		this.delimiters = 0;
+		this.delimitingIndexi = [];
+		this.delimItems = [];
+		this.delimLines = [];
 		
 		this.observer;
 		this.cobserver;
@@ -538,9 +541,15 @@ class MechVirtualListPage extends Page {
 			}
 			this.pageMeta.spaceDom.replaceChildren(spaceSpan, spaceCapacityStr);
 			this.pageMeta.update(this.pageFilters);
+			
+			for(let i = 0; i < evolve.mech.type.standard.length; i++){
+				this.delimLines.push( new GroupVirtualDelimiter(i, new GroupItem('', '', 0)) );
+				this.container.appendChild(this.delimLines[i].dom);
+			}
 			this.dom.appendChild(this.container);
 			this.cobserver.observe(this.container);
 		}
+		
 		this.dom.prepend(this.pageMeta.dom);
 		
 		this.scrollHandler();
@@ -564,6 +573,9 @@ class MechVirtualListPage extends Page {
 		this.dom.replaceChildren();
 		
 		this.delimiters = 0;
+		this.delimitingIndexi.length = 0;
+		this.delimItems.length = 0;
+		this.delimLines.length = 0;
 		
 		this.cobserver.disconnect();
 		this.observer.disconnect();
@@ -581,8 +593,10 @@ class MechVirtualListPage extends Page {
 		// CALCULATIONS & reordering branch - phase 1
 		if(calc){
 			if(this.delimiters > 0){
-				this.dom.children('.delimiter').remove();
+				//this.dom.children('.delimiter').remove();
 				this.delimiters = 0;
+				this.delimitingIndexi.length = 0;
+				this.delimItems.length = 0;
 			}
 			this.pageMeta.factors.reset();
 			this.items.forEach(function(item){
@@ -650,10 +664,210 @@ class MechVirtualListPage extends Page {
 		// calculations & REORDERING branch - phase 2
 		if(calc && this.sort(true)){
 			// SORTED, virtual list handles visual update
+			
+			// Insert delimiters
+			let chassisGrouping = app.config.sortingType != 0 && app.config.sortingType != 4 && app.config.groupingType == 2 && isSpireSetup();
+			if(chassisGrouping){
+				let inGroupCount = 0;
+				let prevChassis = -1;
+				let groupIndex = -1;
+				
+				for(let i = 0; i < this.filteredItems.length; i++){
+					// New group
+					if(prevChassis != this.filteredItems[i].mech.chassis){
+						if(groupIndex > -1){
+							this.delimiters++;
+							this.delimitingIndexi.push(groupIndex);
+							this.delimItems.push( new GroupItem(prevChassis, loc(`portal_mech_chassis_${prevChassis}`), inGroupCount) );
+							inGroupCount = 0;
+						}							
+						groupIndex = i;
+					}
+					
+					inGroupCount++;
+					prevChassis = this.filteredItems[i].mech.chassis;
+				}
+				if(groupIndex > -1 && inGroupCount > 0){
+					this.delimiters++;
+					this.delimitingIndexi.push(groupIndex);
+					this.delimItems.push( new GroupItem(prevChassis, loc(`portal_mech_chassis_${prevChassis}`), inGroupCount) );
+				}
+				
+				// Make up missing delimiter dom items
+				for(let i = this.delimLines.length; i < this.delimiters; i++){
+					this.delimLines.push( new GroupVirtualDelimiter( i, this.delimItems[i] ) );
+					this.container.appendChild(this.delimLines[i].dom);
+				}
+			}
 		}
 		
 		//this.scrollHandler();
 		this.setVirtualItems(calc, this.viewport.start, this.viewport.end);
+	};
+	scrollHandler() {
+		let posScrollY = window.scrollY;
+		if((posScrollY - this.viewport.top) > 0){
+			this.viewport.start = this.findStartIndex(this.heights, (posScrollY - this.viewport.top));
+			// Delimiter correction
+			let correction = 0;
+			while( correction < this.delimitingIndexi.length && this.delimitingIndexi[correction] < this.viewport.start ){
+				correction++;
+			}
+			this.viewport.start -= correction;
+		}
+		else {
+			this.viewport.start = 0;
+		}
+		
+		// Expand additional virtual lines, if current ones are not enough due to page resizing
+		if(this.lines.length < this.viewport.length + this.viewport.overscan * 2){
+			for(let i = this.lines.length; i < this.viewport.length + this.viewport.overscan * 2; i++){
+				let mechLine = new MechVirtualLine(this.modifiable, this.removeMech);
+				this.lines.push(mechLine);
+				this.observer.observe(mechLine.line, vLineObservationOptions);
+				this.cobserver.observe(mechLine.line);
+				this.container.appendChild(mechLine.line);
+			}
+		}
+		
+		this.viewport.end = Math.min(this.filteredItems.length, this.viewport.start + this.viewport.length + this.viewport.overscan);
+		this.viewport.start = Math.min((this.filteredItems.length > 0) ? this.filteredItems.length - 1 : 0, Math.max(0, this.viewport.start - this.viewport.overscan));
+		
+		this.container.style = `height: ${this.getTotalHeight()}px`;
+		//$('#debug_box').text(`${posScrollY} / ${this.viewport.start} ${this.viewport.end} / ${this.viewport.top} / ${(posScrollY - this.viewport.top)}`);
+		
+		this.setVirtualItems(isSpireSetup(), this.viewport.start, this.viewport.end);
+		setTimeout((e)=>{window.requestAnimationFrame(this.positionVirtualItems)}, 0);
+	};
+	setVirtualItems(calc, start, end) {
+		let i = start;
+		let delimiterOffset = 0;
+		for(let d = 0; d < this.delimitingIndexi.length; d++){
+			if(i <= this.delimitingIndexi[d]){
+				delimiterOffset = 38 * d;
+				break;
+			}
+			if(d == (this.delimitingIndexi.length - 1)){
+				delimiterOffset = 38 * this.delimitingIndexi.length;
+			}
+		}
+		
+		let posTop = this.getTopHeight(i);
+		for(; i < end && (i - start) < this.lines.length; i++){
+			//if(i == this.lines[i - start].idx) continue;
+			let delimIndex = this.delimitingIndexi.indexOf(i);
+			if(delimIndex > -1) {
+				delimiterOffset = 38 * (delimIndex + 1); // 36 + 2
+				this.delimLines[delimIndex].set( this.delimItems[delimIndex] );
+				this.delimLines[delimIndex].dom.style.display = null;
+				this.delimLines[delimIndex].dom.style.transform = `translate(0px, ${ posTop + delimiterOffset - 38 }px)`;
+			}
+			
+			this.lines[i - start].set( this.filteredItems[i], i, app.config.truncateWeapons );
+			if(calc) this.lines[i - start].calc();
+			this.lines[i - start].line.style.display = null;
+			this.lines[i - start].line.style.transform = `translate(0px, ${ posTop + delimiterOffset }px)`;
+			posTop += this.filteredItems[i].height;
+		}
+		for(; (i - start) < this.lines.length; i++){
+			this.lines[i - start].line.style.display = 'none';
+			this.lines[i - start].set( null, -1, app.config.truncateWeapons );
+		}
+		for(i = this.delimItems.length; i < this.delimLines.length; i++){
+			this.delimLines[i].dom.style.display = 'none';
+		}
+	};
+	positionVirtualItems() {
+		let delimiterOffset = 0;
+		for(let d = 0; d < this.delimitingIndexi.length; d++){
+			if(this.viewport.start <= this.delimitingIndexi[d]){
+				delimiterOffset = 38 * d;
+				break;
+			}
+			if(d == (this.delimitingIndexi.length - 1)){
+				delimiterOffset = 38 * this.delimitingIndexi.length;
+			}
+		}
+		
+		let posTop = this.getTopHeight(this.viewport.start);
+		for(let i = this.viewport.start; i < this.viewport.end && (i - this.viewport.start) < this.lines.length; i++){
+			let delimIndex = this.delimitingIndexi.indexOf(i);
+			if(delimIndex > -1) {
+				delimiterOffset = 38 * (delimIndex + 1); // 36 + 2
+				this.delimLines[delimIndex].dom.style.transform = `translate(0px, ${ posTop + delimiterOffset - 38 }px)`;
+			}
+			this.lines[i - this.viewport.start].line.style.transform = `translate(0px, ${ posTop + delimiterOffset }px)`;
+			posTop += this.filteredItems[i].height;
+		}
+	};
+	getTotalHeight(idx = -1) {
+		return this.heights[this.heights.length - 1] + 42 + this.delimitingIndexi.length * 38;
+	};
+	getTopHeight(idx = -1) {
+		if(idx < 0 || idx >= this.heights.length)
+			return 0;
+		else
+			return this.heights[idx];
+	};
+	findStartIndex(arr, offset) {
+		let left = 0;
+		let right = arr.length - 1;
+		while( left <= right ){
+			let mid = left + Math.floor((right - left) / 2);
+			if(arr[mid] < offset){
+				left = mid + 1;
+			}
+			else if(arr[mid] > offset){
+				right = mid - 1;
+			}
+			else {
+				return mid - 1;
+			}
+		}
+		if(arr.length > 0 && left > 0){
+			return right - 1;
+		}
+		return 0;
+	};
+	filter = (e)=>{
+		if(!this.shown) return;
+		if(e && e.target && e.target.dataset.hasOwnProperty('pageFilter')){
+			switch(e.target.dataset['pageFilter']){
+				case 'minion':
+				case 'small':
+					this.pageFilters['minion'] = !this.pageFilters['minion'];
+					this.pageFilters['small'] = !this.pageFilters['small'];
+					break;
+				case 'fiend':
+				case 'medium':
+					this.pageFilters['fiend'] = !this.pageFilters['fiend'];
+					this.pageFilters['medium'] = !this.pageFilters['medium'];
+					break;
+				case 'cyberdemon':
+				case 'large':
+					this.pageFilters['cyberdemon'] = !this.pageFilters['cyberdemon'];
+					this.pageFilters['large'] = !this.pageFilters['large'];
+					break;
+				case 'archfiend':
+				case 'titan':
+					this.pageFilters['archfiend'] = !this.pageFilters['archfiend'];
+					this.pageFilters['titan'] = !this.pageFilters['titan'];
+					break;
+				default:
+					this.pageFilters[e.target.dataset['pageFilter']] = !this.pageFilters[e.target.dataset['pageFilter']];
+			}
+			
+			app.heap.pageFilters[this.key] = this.pageFilters;
+			saveHeap();
+			
+			setTimeout(()=>{
+				this.hide();
+				this.show();
+				this.pageMeta.update(this.pageFilters);
+				this.update(isSpireSetup());
+			}, 0);
+		}
+		
 	};
 	sort(yes){
 		let wasSorted = false;
@@ -724,126 +938,6 @@ class MechVirtualListPage extends Page {
 		sortMap.sort(mapSorter);
 		this.filteredItems = sortMap.map((sl) => this.filteredItems[sl.i]);
 		return wasSorted;
-	};
-	getTotalHeight(idx = -1) {
-		return this.heights[this.heights.length - 1] + 42;
-	};
-	getTopHeight(idx = -1) {
-		if(idx < 0 || idx >= this.heights.length)
-			return 0;
-		else
-			return this.heights[idx];
-	};
-	findStartIndex(arr, offset) {
-		let left = 0;
-		let right = arr.length - 1;
-		while( left <= right ){
-			let mid = left + Math.floor((right - left) / 2);
-			if(arr[mid] < offset){
-				left = mid + 1;
-			}
-			else if(arr[mid] > offset){
-				right = mid - 1;
-			}
-			else {
-				return mid - 1;
-			}
-		}
-		if(arr.length > 0 && left > 0){
-			return right - 1;
-		}
-		return 0;
-	};
-	scrollHandler() {
-		let posScrollY = window.scrollY;
-		if((posScrollY - this.viewport.top) > 0){
-			this.viewport.start = this.findStartIndex(this.heights, (posScrollY - this.viewport.top));
-		}
-		else {
-			this.viewport.start = 0;
-		}
-		
-		// Expand additional virtual lines, if current ones are not enough due to page resizing
-		if(this.lines.length < this.viewport.length + this.viewport.overscan * 2){
-			for(let i = this.lines.length; i < this.viewport.length + this.viewport.overscan * 2; i++){
-				let mechLine = new MechVirtualLine(this.modifiable, this.removeMech);
-				this.lines.push(mechLine);
-				this.observer.observe(mechLine.line, vLineObservationOptions);
-				this.cobserver.observe(mechLine.line);
-				this.container.appendChild(mechLine.line);
-			}
-		}
-		
-		this.viewport.end = Math.min(this.filteredItems.length, this.viewport.start + this.viewport.length + this.viewport.overscan);
-		this.viewport.start = Math.min((this.filteredItems.length > 0) ? this.filteredItems.length - 1 : 0, Math.max(0, this.viewport.start - this.viewport.overscan));
-		
-		this.container.style = `height: ${this.getTotalHeight()}px`;
-		//$('#debug_box').text(`${posScrollY} / ${this.viewport.start} ${this.viewport.end} / ${this.viewport.top} / ${(posScrollY - this.viewport.top)}`);
-		
-		this.setVirtualItems(isSpireSetup(), this.viewport.start, this.viewport.end);
-		setTimeout((e)=>{window.requestAnimationFrame(this.positionVirtualItems)}, 0);
-	};
-	setVirtualItems(calc, start, end) {
-		let i = start;
-		let posTop = this.getTopHeight(i);
-		for(; i < end && (i - start) < this.lines.length; i++){
-			//if(i == this.lines[i - start].idx) continue;
-			
-			this.lines[i - start].set( this.filteredItems[i], i, app.config.truncateWeapons );
-			if(calc) this.lines[i - start].calc();
-			this.lines[i - start].line.style.display = null;
-			this.lines[i - start].line.style.transform = `translate(0px, ${ posTop }px)`;
-			posTop += this.filteredItems[i].height;
-		}
-		for(; (i - start) < this.lines.length; i++){
-			this.lines[i - start].line.style.display = 'none';
-			this.lines[i - start].set( null, -1, app.config.truncateWeapons );
-		}
-	}
-	positionVirtualItems() {
-		for(let i = this.viewport.start; i < this.viewport.end && (i - this.viewport.start) < this.lines.length; i++){
-			this.lines[i - this.viewport.start].line.style.transform = `translate(0px, ${ this.getTopHeight(i) }px)`;
-		}
-	}
-	filter = (e)=>{
-		if(!this.shown) return;
-		if(e && e.target && e.target.dataset.hasOwnProperty('pageFilter')){
-			switch(e.target.dataset['pageFilter']){
-				case 'minion':
-				case 'small':
-					this.pageFilters['minion'] = !this.pageFilters['minion'];
-					this.pageFilters['small'] = !this.pageFilters['small'];
-					break;
-				case 'fiend':
-				case 'medium':
-					this.pageFilters['fiend'] = !this.pageFilters['fiend'];
-					this.pageFilters['medium'] = !this.pageFilters['medium'];
-					break;
-				case 'cyberdemon':
-				case 'large':
-					this.pageFilters['cyberdemon'] = !this.pageFilters['cyberdemon'];
-					this.pageFilters['large'] = !this.pageFilters['large'];
-					break;
-				case 'archfiend':
-				case 'titan':
-					this.pageFilters['archfiend'] = !this.pageFilters['archfiend'];
-					this.pageFilters['titan'] = !this.pageFilters['titan'];
-					break;
-				default:
-					this.pageFilters[e.target.dataset['pageFilter']] = !this.pageFilters[e.target.dataset['pageFilter']];
-			}
-			
-			app.heap.pageFilters[this.key] = this.pageFilters;
-			saveHeap();
-			
-			setTimeout(()=>{
-				this.hide();
-				this.show();
-				this.pageMeta.update(this.pageFilters);
-				this.update(isSpireSetup());
-			}, 0);
-		}
-		
 	};
 	addMech(mech) {
 		//if(!this.shown) return;
@@ -1538,6 +1632,30 @@ class MetaLine {
 }
 
 const vLineObservationOptions = { box: 'border-box' };
+
+function GroupItem(key, label, count){
+	this.key = key;
+	this.label = label;
+	this.count = count;
+}
+
+class GroupVirtualDelimiter {
+	constructor(i, groupItem){
+		this.idx = i;
+		this.dom = document.createElement('div');
+		this.dom.className = `mcLn line delimiter ${groupItem.key}`;
+		let titleDiv = document.createElement('div');
+		titleDiv.className = 'title';
+		this.label = document.createElement('span');
+		this.label.textContent = `${groupItem.count}x ${groupItem.label}`;
+		titleDiv.appendChild(this.label);
+		this.dom.appendChild(titleDiv);
+	};
+	set(groupItem){
+		this.dom.className = `mcLn line delimiter ${groupItem.key}`;
+		this.label.textContent = `${groupItem.count}x ${groupItem.label}`;
+	};
+}
 
 export class MechItem {
 	constructor(mech, i){

@@ -263,6 +263,15 @@ export function throttle(fn, limit){
 		}
 	}
 }
+export function debounce(fn, wait){
+	let timer = null;
+	return function(...args){
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			fn(...args);
+		}, wait);
+	}
+}
 
 let storage;
 try{
