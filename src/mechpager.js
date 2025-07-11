@@ -1,4 +1,4 @@
-import { app, initData, saveConfig, saveLabels, saveHeap, getMechList, saveMechList, numFormat } from './app.js';
+import { app, initData, saveConfig, saveLabels, saveHeap, getMechList, saveMechList, numFormat, throttle } from './app.js';
 
 import { global } from '../evolve/src/vars.js';
 import { mechRating, mechSize } from '../evolve/src/portal.js';
@@ -48,7 +48,9 @@ export const mechPager = {
 		mechPager.pages.length = app.maxMechPages;
 		for(var i = 0; i < mechPager.pages.length; i++){
 			let pName = (app.labels[i]) ? `P${i+1} | ${app.labels[i]}` : `${loc('mcs_pager_page')} ${i+1}`;
-			mechPager.pages[i] = new MechListPage(i, pName, getMechList(i), i, true);
+			mechPager.pages[i] = (app.config.virtualList)
+								? new MechVirtualListPage(i, pName, getMechList(i), i, true)
+								: new MechListPage(i, pName, getMechList(i), i, true);
 			pageDropdown.append($(`<a data-val="${i}">${i+1}</a>`).on('click', {i: i}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 			pageContainer.append(mechPager.pages[i].dom);
 		}
@@ -61,7 +63,9 @@ export const mechPager = {
 		pageDropdown.append($(`<a class="fullSpan"></a>`).text(hvtPage.name).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 		pageContainer.append(hvtPage.dom);
 		
-		let bayPage = new MechListPage('mechbay', loc('portal_mechbay_title'), global.portal.mechbay.mechs ?? [], -1, true);
+		let bayPage = (app.config.virtualList)
+					? new MechVirtualListPage('mechbay', loc('portal_mechbay_title'), global.portal.mechbay.mechs ?? [], -1, true)
+					: new MechListPage('mechbay', loc('portal_mechbay_title'), global.portal.mechbay.mechs ?? [], -1, true);
 		mechPager.specialPages.push(bayPage);
 		pageDropdown.append($(`<a class="fullSpan"></a>`).text(bayPage.name).on('click', {i: -mechPager.specialPages.length}, (e)=>{ setTimeout(()=>{ mechPager.showPage(e.data.i); mechPager.update(true); }, 0) }));
 		pageContainer.append(bayPage.dom);
@@ -397,6 +401,588 @@ export class Page {
 	};
 }
 
+class MechVirtualListPage extends Page {
+	constructor(key, name, mechList, id, modifiable=true) {
+		super();
+		
+		this.key = key;
+		this.name = name;
+		this.id = id;
+		this.mechList = mechList;
+		this.items = [];
+		this.filteredItems = [];
+		this.lines = [];
+		this.heights = [];
+		this.dom = $(`<div id="mpage-${id}" class="smaller vlist"></div>`).get(0);
+		this.modifiable = modifiable;
+		this.clearable = true;
+		this.originalOrder = true;
+		
+		this.pageFilters = Object.create(pageFilters);
+		if(app.heap.pageFilters[this.key]) Object.assign(this.pageFilters, app.heap.pageFilters[this.key]);
+		this.pageMeta = new MetaLine();
+		
+		// Vanilla
+		this.pageMeta.dom = this.pageMeta.dom.get(0);
+		this.pageMeta.summaryDom.addEventListener('click', this.filter);
+		this.pageMeta.totals = Object.create(metaTotals);
+		this.container = document.createElement('div');
+		this.container.className = 'mpage-cont';
+		
+		this.dudString = emptyListDud( (key == 'mechbay') ? loc('mcs_pager_dud_mechbay') : loc('mcs_pager_dud_empty') );
+		this.delimiters = 0;
+		this.delimitingIndexi = [];
+		this.delimItems = [];
+		this.delimLines = [];
+		
+		this.observer;
+		this.cobserver;
+		this.scrollHandler = throttle(this.scrollHandler.bind(this), 25);
+		this.positionVirtualItems = this.positionVirtualItems.bind(this);
+		
+		this.viewport = {scroll: 0, top: 0, start: 0, end: 0, overscan: 10, length: 50, height: 480};
+		
+		if(key == 'mechbay')
+			this.pageFilters['collector'] = false;
+	};
+	show() {
+		if(this.shown) return;
+		
+		this.shown = true;
+		
+		this.cobserver = new IntersectionObserver((entries) => {
+			for (let entry of entries) {
+				if(entry.target == this.container){
+					let offsetTarget = entry.target;
+					this.viewport.top = 0;
+					this.viewport.height = entry.rootBounds.height;
+					this.viewport.length = Math.min(90, Math.max(40, Math.ceil(this.viewport.height / 22 ) + 5));
+					while(offsetTarget !== null){
+						this.viewport.top += offsetTarget.offsetTop;
+						offsetTarget = offsetTarget.offsetParent;
+					}
+				}
+				else if(entry.boundingClientRect.height > 0 && entry.target.dataset.idx >= 0){
+					this.filteredItems[entry.target.dataset.idx].height = entry.boundingClientRect.height + 2;
+				}
+			}
+			
+			let rollingHeight = 0;
+			for(let i = 0; i < this.filteredItems.length; i++){
+				this.heights[i] = rollingHeight;
+				rollingHeight += this.filteredItems[i].height;
+			}
+			
+		}, { root: null, threshold: [0, 0.01, 0.05, 0.1, 0.5, 0.75, 0.9, 0.99, 1] });
+		this.observer = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				if(entry.contentRect.height > 0 && entry.target.dataset.idx >= 0){
+					this.filteredItems[entry.target.dataset.idx].height = entry.contentRect.height + 2;
+				}
+			}
+			
+			let rollingHeight = 0;
+			for(let i = 0; i < this.filteredItems.length; i++){
+				this.heights[i] = rollingHeight;
+				rollingHeight += this.filteredItems[i].height;
+			}
+		});
+		
+		let createItems = ( this.mechList.length != this.items.length );
+		let rollingHeight = 0;
+		let space = 0;
+		this.pageMeta.totals = Object.create(metaTotals);
+		if(createItems)
+			this.items.length = 0;
+		
+		this.mechList.forEach(function(mech, i){
+			let mechItem;
+			if(createItems){
+				mechItem = new MechItem(mech, i);
+				this.items.push(mechItem);
+			}
+			else{
+				mechItem = this.items[i];
+			}
+			
+			if(this.pageFilters[mech.size]){
+				this.heights.push(rollingHeight);
+				this.filteredItems.push(mechItem);
+				rollingHeight += mechItem.height;
+			}
+			space += mechSize(mech.size);
+			this.pageMeta.totals[mech.size]++;
+			
+		}, this);
+		
+		for(let i = 0; i < this.viewport.length + this.viewport.overscan * 2; i++){
+			let mechLine = new MechVirtualLine(this.modifiable, this.removeMech);
+			this.lines.push(mechLine);
+			this.observer.observe(mechLine.line, vLineObservationOptions);
+			this.cobserver.observe(mechLine.line);
+			this.container.appendChild(mechLine.line);
+		}
+		
+		if(this.mechList.length == 0){
+			this.dom.appendChild($(this.dudString).get(0));
+			this.pageMeta.update(this.pageFilters);
+		}
+		else{
+			let spaceSpan = document.createElement('span');
+			spaceSpan.appendChild(document.createTextNode(`${space}`));
+			let spaceCapacityStr;
+			
+			if(this.key == 'mechbay'){
+				spaceCapacityStr = ` / ${global.portal.mechbay.max}`;
+				if(space > global.portal.mechbay.max) spaceSpan.className = 'error';
+			}
+			else {
+				spaceCapacityStr = `/ \u{221e}`;
+			}
+			this.pageMeta.spaceDom.replaceChildren(spaceSpan, spaceCapacityStr);
+			this.pageMeta.update(this.pageFilters);
+			
+			for(let i = 0; i < evolve.mech.type.standard.length; i++){
+				this.delimLines.push( new GroupVirtualDelimiter(i, new GroupItem('', '', 0)) );
+				this.container.appendChild(this.delimLines[i].dom);
+			}
+			this.dom.appendChild(this.container);
+			this.cobserver.observe(this.container);
+		}
+		
+		this.dom.prepend(this.pageMeta.dom);
+		
+		this.scrollHandler();
+		window.addEventListener('resize', this.scrollHandler);
+		document.addEventListener('scroll', this.scrollHandler);
+	};
+	hide() {
+		if(!this.shown) return;
+		
+		this.shown = false;
+		
+		window.removeEventListener('resize', this.scrollHandler);
+		document.removeEventListener('scroll', this.scrollHandler);
+		this.lines.length = 0;
+		//this.items.length = 0;
+		this.filteredItems.length = 0;
+		this.heights.length = 0;
+		this.dom.removeChild(this.pageMeta.dom);
+		if(this.container.parentElement) this.dom.removeChild(this.container);
+		this.container.replaceChildren();
+		this.dom.replaceChildren();
+		
+		this.delimiters = 0;
+		this.delimitingIndexi.length = 0;
+		this.delimItems.length = 0;
+		this.delimLines.length = 0;
+		
+		this.cobserver.disconnect();
+		this.observer.disconnect();
+	};
+	update(calc) {
+		if(!this.shown) return;
+		
+		// First calc new values
+		let n = 0;
+		let space = 0;
+		let edenTax = (this.key == 'mechbay')? (global.eden?.mech_station?.mechs || 0) : 0;
+		let fKeys = calc? Object.keys(this.pageMeta.factors) : {};
+		
+		// TODO: Handle group delimiters
+		// CALCULATIONS & reordering branch - phase 1
+		if(calc){
+			if(this.delimiters > 0){
+				//this.dom.children('.delimiter').remove();
+				this.delimiters = 0;
+				this.delimitingIndexi.length = 0;
+				this.delimItems.length = 0;
+			}
+			this.pageMeta.factors.reset();
+			this.items.forEach(function(item){
+				space += mechSize(item.mech.size);
+				item.calc();
+				
+				if(item.mech.size !== 'collector'){
+					fKeys.forEach(function(f, i){
+						switch(f){
+							case 'rr':
+								if(edenTax > 0)
+									edenTax--;
+								else if(space <= global.portal.mechbay.max || this.key != 'mechbay')
+									this.pageMeta.factors[f].val += item.factors[f].val;
+								break;
+							default:
+								this.pageMeta.factors[f].val = (item.factors[f].val + n * this.pageMeta.factors[f].val)/(n + 1);
+						}
+					}, this);
+					n++;
+				}
+			}, this);
+		}
+		
+		// No hard calculations
+		else{
+			this.items.forEach(function(item){
+				space += mechSize(item.mech.size);
+			});
+			
+		}
+		
+		// Page meta updates
+		if(calc){
+			this.pageMeta.factors.applyValues();
+			this.pageMeta.factors['ar'].dom.setAttribute('title', `${loc('mcs_pager_total_raw_rate')}: ${numFormat.format(Math.round(this.pageMeta.factors['rr'].val * 1000 * global.portal.spire.count))}`);
+			let etaSummary = (`ET [` + ((this.pageMeta.factors['rr']?.val)? timeFormat(100 / (this.pageMeta.factors['rr'].val)) : timeFormat(-1)) + `]`);
+			if(this.key == 'mechbay'){	
+				let spaceSpan = document.createElement('span');
+				if(space > global.portal.mechbay.max) spaceSpan.className = 'error';
+				spaceSpan.appendChild(document.createTextNode(`${space}`));
+				this.pageMeta.spaceDom.replaceChildren(spaceSpan, ` / ${global.portal.mechbay.max}`);
+				
+				etaSummary += `    - ${(100 - global.portal.spire.progress).toFixed(2)}% left [` + ((this.pageMeta.factors['rr']?.val)? timeFormat((100 - global.portal.spire.progress) / (this.pageMeta.factors['rr'].val)) : timeFormat(-1)) + `]`;
+				if(global.eden?.mech_station?.mechs > 0){
+					etaSummary += ` - ${global.eden.mech_station.mechs} mechs busy in ${loc('tab_eden')}`;
+				}
+			}
+			else {
+				
+			}
+			
+			this.pageMeta.etaDom.textContent = etaSummary;
+		}
+		
+		// Mech bay space update
+		if(this.key == 'mechbay'){
+		}
+		else {
+			let spaceSpan = document.createElement('span');
+			spaceSpan.appendChild(document.createTextNode(`${space}`));
+			this.pageMeta.spaceDom.replaceChildren(spaceSpan, '/ \u{221e}');
+		}
+		
+		// calculations & REORDERING branch - phase 2
+		if(calc && this.sort(true)){
+			// SORTED, virtual list handles visual update
+			
+			// Insert delimiters
+			let chassisGrouping = app.config.sortingType != 0 && app.config.sortingType != 4 && app.config.groupingType == 2 && isSpireSetup();
+			if(chassisGrouping){
+				let inGroupCount = 0;
+				let prevChassis = -1;
+				let groupIndex = -1;
+				
+				for(let i = 0; i < this.filteredItems.length; i++){
+					// New group
+					if(prevChassis != this.filteredItems[i].mech.chassis){
+						if(groupIndex > -1){
+							this.delimiters++;
+							this.delimitingIndexi.push(groupIndex);
+							this.delimItems.push( new GroupItem(prevChassis, loc(`portal_mech_chassis_${prevChassis}`), inGroupCount) );
+							inGroupCount = 0;
+						}							
+						groupIndex = i;
+					}
+					
+					inGroupCount++;
+					prevChassis = this.filteredItems[i].mech.chassis;
+				}
+				if(groupIndex > -1 && inGroupCount > 0){
+					this.delimiters++;
+					this.delimitingIndexi.push(groupIndex);
+					this.delimItems.push( new GroupItem(prevChassis, loc(`portal_mech_chassis_${prevChassis}`), inGroupCount) );
+				}
+				
+				// Make up missing delimiter dom items
+				for(let i = this.delimLines.length; i < this.delimiters; i++){
+					this.delimLines.push( new GroupVirtualDelimiter( i, this.delimItems[i] ) );
+					this.container.appendChild(this.delimLines[i].dom);
+				}
+			}
+		}
+		
+		//this.scrollHandler();
+		this.setVirtualItems(calc, this.viewport.start, this.viewport.end);
+	};
+	scrollHandler() {
+		let posScrollY = window.scrollY;
+		if((posScrollY - this.viewport.top) > 0){
+			this.viewport.start = this.findStartIndex(this.heights, (posScrollY - this.viewport.top));
+			// Delimiter correction
+			let correction = 0;
+			while( correction < this.delimitingIndexi.length && this.delimitingIndexi[correction] < this.viewport.start ){
+				correction++;
+			}
+			this.viewport.start -= correction;
+		}
+		else {
+			this.viewport.start = 0;
+		}
+		
+		// Expand additional virtual lines, if current ones are not enough due to page resizing
+		if(this.lines.length < this.viewport.length + this.viewport.overscan * 2){
+			for(let i = this.lines.length; i < this.viewport.length + this.viewport.overscan * 2; i++){
+				let mechLine = new MechVirtualLine(this.modifiable, this.removeMech);
+				this.lines.push(mechLine);
+				this.observer.observe(mechLine.line, vLineObservationOptions);
+				this.cobserver.observe(mechLine.line);
+				this.container.appendChild(mechLine.line);
+			}
+		}
+		
+		this.viewport.end = Math.min(this.filteredItems.length, this.viewport.start + this.viewport.length + this.viewport.overscan);
+		this.viewport.start = Math.min((this.filteredItems.length > 0) ? this.filteredItems.length - 1 : 0, Math.max(0, this.viewport.start - this.viewport.overscan));
+		
+		this.container.style = `height: ${this.getTotalHeight()}px`;
+		//$('#debug_box').text(`${posScrollY} / ${this.viewport.start} ${this.viewport.end} / ${this.viewport.top} / ${(posScrollY - this.viewport.top)}`);
+		
+		this.setVirtualItems(isSpireSetup(), this.viewport.start, this.viewport.end);
+		setTimeout((e)=>{window.requestAnimationFrame(this.positionVirtualItems)}, 0);
+	};
+	setVirtualItems(calc, start, end) {
+		let i = start;
+		let delimiterOffset = 0;
+		for(let d = 0; d < this.delimitingIndexi.length; d++){
+			if(i <= this.delimitingIndexi[d]){
+				delimiterOffset = 38 * d;
+				break;
+			}
+			if(d == (this.delimitingIndexi.length - 1)){
+				delimiterOffset = 38 * this.delimitingIndexi.length;
+			}
+		}
+		
+		let posTop = this.getTopHeight(i);
+		for(; i < end && (i - start) < this.lines.length; i++){
+			//if(i == this.lines[i - start].idx) continue;
+			let delimIndex = this.delimitingIndexi.indexOf(i);
+			if(delimIndex > -1) {
+				delimiterOffset = 38 * (delimIndex + 1); // 36 + 2
+				this.delimLines[delimIndex].set( this.delimItems[delimIndex] );
+				this.delimLines[delimIndex].dom.style.display = null;
+				this.delimLines[delimIndex].dom.style.transform = `translate(0px, ${ posTop + delimiterOffset - 38 }px)`;
+			}
+			
+			this.lines[i - start].set( this.filteredItems[i], i, app.config.truncateWeapons );
+			if(calc) this.lines[i - start].calc();
+			this.lines[i - start].line.style.display = null;
+			this.lines[i - start].line.style.transform = `translate(0px, ${ posTop + delimiterOffset }px)`;
+			posTop += this.filteredItems[i].height;
+		}
+		for(; (i - start) < this.lines.length; i++){
+			this.lines[i - start].line.style.display = 'none';
+			this.lines[i - start].set( null, -1, app.config.truncateWeapons );
+		}
+		for(i = this.delimItems.length; i < this.delimLines.length; i++){
+			this.delimLines[i].dom.style.display = 'none';
+		}
+	};
+	positionVirtualItems() {
+		let delimiterOffset = 0;
+		for(let d = 0; d < this.delimitingIndexi.length; d++){
+			if(this.viewport.start <= this.delimitingIndexi[d]){
+				delimiterOffset = 38 * d;
+				break;
+			}
+			if(d == (this.delimitingIndexi.length - 1)){
+				delimiterOffset = 38 * this.delimitingIndexi.length;
+			}
+		}
+		
+		let posTop = this.getTopHeight(this.viewport.start);
+		for(let i = this.viewport.start; i < this.viewport.end && (i - this.viewport.start) < this.lines.length; i++){
+			let delimIndex = this.delimitingIndexi.indexOf(i);
+			if(delimIndex > -1) {
+				delimiterOffset = 38 * (delimIndex + 1); // 36 + 2
+				this.delimLines[delimIndex].dom.style.transform = `translate(0px, ${ posTop + delimiterOffset - 38 }px)`;
+			}
+			this.lines[i - this.viewport.start].line.style.transform = `translate(0px, ${ posTop + delimiterOffset }px)`;
+			posTop += this.filteredItems[i].height;
+		}
+	};
+	getTotalHeight(idx = -1) {
+		return this.heights[this.heights.length - 1] + 42 + this.delimitingIndexi.length * 38;
+	};
+	getTopHeight(idx = -1) {
+		if(idx < 0 || idx >= this.heights.length)
+			return 0;
+		else
+			return this.heights[idx];
+	};
+	findStartIndex(arr, offset) {
+		let left = 0;
+		let right = arr.length - 1;
+		while( left <= right ){
+			let mid = left + Math.floor((right - left) / 2);
+			if(arr[mid] < offset){
+				left = mid + 1;
+			}
+			else if(arr[mid] > offset){
+				right = mid - 1;
+			}
+			else {
+				return mid - 1;
+			}
+		}
+		if(arr.length > 0 && left > 0){
+			return right - 1;
+		}
+		return 0;
+	};
+	filter = (e)=>{
+		if(!this.shown) return;
+		if(e && e.target && e.target.dataset.hasOwnProperty('pageFilter')){
+			switch(e.target.dataset['pageFilter']){
+				case 'minion':
+				case 'small':
+					this.pageFilters['minion'] = !this.pageFilters['minion'];
+					this.pageFilters['small'] = !this.pageFilters['small'];
+					break;
+				case 'fiend':
+				case 'medium':
+					this.pageFilters['fiend'] = !this.pageFilters['fiend'];
+					this.pageFilters['medium'] = !this.pageFilters['medium'];
+					break;
+				case 'cyberdemon':
+				case 'large':
+					this.pageFilters['cyberdemon'] = !this.pageFilters['cyberdemon'];
+					this.pageFilters['large'] = !this.pageFilters['large'];
+					break;
+				case 'archfiend':
+				case 'titan':
+					this.pageFilters['archfiend'] = !this.pageFilters['archfiend'];
+					this.pageFilters['titan'] = !this.pageFilters['titan'];
+					break;
+				default:
+					this.pageFilters[e.target.dataset['pageFilter']] = !this.pageFilters[e.target.dataset['pageFilter']];
+			}
+			
+			app.heap.pageFilters[this.key] = this.pageFilters;
+			saveHeap();
+			
+			setTimeout(()=>{
+				this.hide();
+				this.show();
+				this.pageMeta.update(this.pageFilters);
+				this.update(isSpireSetup());
+			}, 0);
+		}
+		
+	};
+	sort(yes){
+		let wasSorted = false;
+		
+		let sortMap;
+		let mapSorter;
+		let overrideGrouping = (app.config.sortingType == 4) ? 0 : app.config.groupingType;
+		switch(overrideGrouping){
+			case 1:
+			case 2:
+				mapSorter = (a, b) =>	(a.v2 < b.v2) ? 1 : (a.v2 > b.v2) ? -1 : 
+										((a.v1 < b.v1)? -app.config.sortingDirection : (a.v1 > b.v1)? app.config.sortingDirection : 0);
+				break;
+			default:
+				mapSorter = (a, b) => (a.v1 < b.v1) ? -app.config.sortingDirection : (a.v1 > b.v1) ? app.config.sortingDirection : 0;
+				break;
+		}
+		
+		switch(app.config.sortingType){
+			case 1:
+			case 2:
+			case 3:
+				sortMap = this.filteredItems.map((item, i) => (
+					{ 
+						i, 
+						v1: (()=>{switch(app.config.sortingType){
+							case 1:
+								return item.factors.ff.val;
+							case 2:
+								return item.factors.ar.val;
+							case 3:
+								return sizeSortingRatings[item.mech.size];
+						}})(), 
+						v2: (()=>{switch(overrideGrouping){
+							case 1:
+								return sizeSortingRatings[item.mech.size];
+							case 2:
+								return chassisSortingRatings[item.mech.chassis];
+							default:
+								return null;
+						}})()
+					}
+				));
+				wasSorted = true;
+				this.originalOrder = false;
+				break;
+			case 4:
+				// Original unsorted mech list order
+				if(this.originalOrder)
+					return false;
+				else{
+					sortMap = this.filteredItems.map((item, i) => (
+						{ 
+							i, 
+							v1: this.mechList.indexOf(item.mech), 
+							v2: null
+						}
+					), this);
+					mapSorter = (b, a) => (a.v1 < b.v1) ? 1 : (a.v1 > b.v1) ? -1 : 0;
+					wasSorted = true;
+					this.originalOrder = true;
+				}
+				break;
+			default:
+				return false;
+		}
+		
+		sortMap.sort(mapSorter);
+		this.filteredItems = sortMap.map((sl) => this.filteredItems[sl.i]);
+		return wasSorted;
+	};
+	addMech(mech) {
+		//if(!this.shown) return;
+		if(!this.modifiable){
+			inform('error', loc('mcs_error_page_unmodifiable'));
+			return;
+		}
+		
+		if(this.key == 'mechbay' && global.eden?.mech_station?.mechs) global.eden.mech_station.mechs = 0;
+		
+		this.mechList.push(mech);
+		mechPager.saveMechList(this.id, this.mechList);
+		
+		let mechItem = new MechItem(mech, this.mechList.length);
+		this.items.push(mechItem);
+		this.pageMeta.totals[mech.size]++;
+		this.pageMeta.update(this.pageFilters);
+		this.hide();
+		this.show();
+		
+		inform('log', 'Mech added', 'added_mech');
+	};
+	removeMech = (vline)=>{
+		if(!vline || vline.mechItem === null) return;
+		let i = this.mechList.indexOf(vline.mechItem.mech);
+		let k = this.items.indexOf(vline.mechItem);		
+		if(i < 0 || k < 0) return;
+		
+		this.pageMeta.totals[this.mechList[i].size]--;
+		this.mechList.splice(i, 1);
+		this.items.splice(k, 1);
+		
+		mechPager.saveMechList(this.id, this.mechList);
+		
+		if(this.key == 'mechbay' && global.eden?.mech_station?.mechs) global.eden.mech_station.mechs = 0;
+		
+		setTimeout(()=>{
+			this.hide();
+			this.show();
+			this.pageMeta.update(this.pageFilters);
+			this.update(isSpireSetup())
+		}, 0);
+	};
+}
+
 class MechListPage extends Page {
 	constructor(key, name, mechList, id, modifiable=true) {
 		super();
@@ -406,7 +992,7 @@ class MechListPage extends Page {
 		this.id = id;
 		this.mechList = mechList;
 		this.lines = [];
-		this.dom = $(`<div id="mpage-${id}"></div>`);
+		this.dom = $(`<div id="mpage-${id}" class="smaller"></div>`);
 		this.modifiable = modifiable;
 		this.clearable = true;
 		this.originalOrder = true;
@@ -832,7 +1418,7 @@ class HeavyTitanPage extends MechListPage {
 		super(key, name, tvhList, id, false);
 		this.clearable = false;
 		
-		this.explainLine = $('<div class="line smaller"><div class="text" id="hvtExplain"></div></div>');
+		this.explainLine = $('<div class="line"><div class="text" id="hvtExplain"></div></div>');
 		
 		let spanTitan = `<span class="titan">${loc('portal_mech_size_titan')}</span>`;
 		let spanHeavy = `<span class="large">${loc('portal_mech_size_large')}</span>`;
@@ -891,7 +1477,7 @@ class HeavyTitanPage extends MechListPage {
 	
 }
 
-const emptyListDud = (text) => `<div class="line smaller" ><div class="text"><span><i>&lt; ${text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")} &gt;</i></span></div></div>`;
+const emptyListDud = (text) => `<div class="line" ><div class="text"><span><i>&lt; ${text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")} &gt;</i></span></div></div>`;
 
 var mechAllSizes = evolve.mech.size.standard.concat( evolve.mech.size.warlord );
 
@@ -920,7 +1506,7 @@ const metaTotals = Object.fromEntries(mechAllSizes.map((s)=>[s, 0]));
 
 function GroupDelimiter(locString, name, count){			
 	let delNode = document.createElement('div');
-	delNode.className = `mcLn line delimiter smaller ${name}`;
+	delNode.className = `mcLn line delimiter ${name}`;
 	let titleDiv = document.createElement('div');
 	titleDiv.className = 'title';
 	let delSpan = document.createElement('span');
@@ -994,7 +1580,7 @@ class MetaLine {
 		
 		// Vanilla
 		let line = document.createElement('div');
-		line.className = `mcLn line smaller meta`;
+		line.className = `mcLn line meta`;
 		
 		let title = document.createElement('div');
 		title.className = 'title';
@@ -1045,6 +1631,156 @@ class MetaLine {
 	};
 }
 
+const vLineObservationOptions = { box: 'border-box' };
+
+function GroupItem(key, label, count){
+	this.key = key;
+	this.label = label;
+	this.count = count;
+}
+
+class GroupVirtualDelimiter {
+	constructor(i, groupItem){
+		this.idx = i;
+		this.dom = document.createElement('div');
+		this.dom.className = `mcLn line delimiter ${groupItem.key}`;
+		let titleDiv = document.createElement('div');
+		titleDiv.className = 'title';
+		this.label = document.createElement('span');
+		this.label.textContent = `${groupItem.count}x ${groupItem.label}`;
+		titleDiv.appendChild(this.label);
+		this.dom.appendChild(titleDiv);
+	};
+	set(groupItem){
+		this.dom.className = `mcLn line delimiter ${groupItem.key}`;
+		this.label.textContent = `${groupItem.count}x ${groupItem.label}`;
+	};
+}
+
+export class MechItem {
+	constructor(mech, i){
+		this.idx = i;
+		this.mech = mech;
+		this.factors = new LineFactors();
+		this.height = 22;
+	};
+	calc(){
+		this.factors.tf.val = doTheTerrainFactorThing(this.mech);
+		this.factors.wf.val = (this.mech.size != 'collector')? doTheWeaponFactorThing(this.mech) : 0;
+		this.factors.ff.val = (this.mech.size != 'collector')? this.factors.tf.val * this.factors.wf.val : this.factors.tf.val;
+		this.factors.rr.val = mechRating(this.mech, false);
+		this.factors.ar.val = adjustRawRating(this.mech, this.factors.rr.val);		
+	};
+}
+
+export class MechVirtualLine {
+	constructor(deletable=true, removeCallback){
+		this.deletable = deletable;
+		this.removeCallback = removeCallback;
+		this.mechItem = null;
+		this.idx = -1;
+		
+		// Vanilla
+		let line = document.createElement('div');
+		line.className = `mcLn line`;
+		line.dataset.idx = this.idx;
+		
+		let title = document.createElement('div');
+		title.className = 'title';
+		let size = document.createElement('span');
+		size.className = 'mcCls';
+		let type = document.createElement('span');
+		title.appendChild(size);
+		title.appendChild(type);
+		
+		this.factors = new LineFactors();
+		let stats = [];
+		lineFactorKeys.forEach(function(f, i){
+			if(f == 'rr') return;
+			let statDiv = document.createElement('div');
+			statDiv.className = `stat sco${i}`;
+			stats.push(statDiv);
+			this.factors[f].dom = statDiv;
+		}, this);
+				
+		let description = document.createElement('div');
+		description.className = 'text';
+		let wepDom = document.createElement('span');
+		let equipSpan = document.createElement('span');
+		equipSpan.className = 'mcCls';
+		
+		let deleteSpan;
+		if(deletable){
+			deleteSpan = document.createElement('span');
+			deleteSpan.className = 'delete';
+			deleteSpan.appendChild(document.createTextNode('x'));
+			description.appendChild(deleteSpan);
+			
+			deleteSpan.addEventListener('click', removeCallback.bind(null, this), /*{'once': true}*/);
+		}
+		description.appendChild(wepDom);
+		description.appendChild(equipSpan);
+			
+		line.appendChild(title);
+		for(let stat of stats){
+			line.appendChild(stat);
+		}
+		
+		line.appendChild(description);
+		this.line = line;
+		this.size = size;
+		this.type = type;
+		this.wep = wepDom;
+		this.equip = equipSpan;
+		this.delet = (deletable) ? deleteSpan : null;
+		
+	};
+	set(mechItem, idx, truncate){
+		this.mechItem = mechItem;
+		this.idx = idx;
+		
+		if(!this.mechItem) {
+			// TODO: remove delete event listeners??
+			return;
+		}
+		let weapons = [];
+		mechItem.mech.hardpoint.forEach(function(w, i){
+			if(truncate && i > 0) { weapons.push('..'); return;}
+			weapons.push(loc(`portal_mech_weapon_${w}`));
+		});
+		
+		let equips = [];
+		mechItem.mech.equip.forEach(function(e){
+			equips.push(loc(`portal_mech_equip_${mechConstructor.filterEquip(mechItem.mech.size, e)}`));
+		});
+		
+		this.line.dataset.idx = this.idx;
+		this.line.className = `mcLn line ${mechItem.mech.size} ${mechItem.mech.chassis} ${(mechItem.mech.infernal && global.blood['prepared'] == 3)? 'infernal' : ''}`;
+		this.size.textContent = loc(`portal_mech_size_${mechItem.mech.size}`);
+		this.type.textContent = loc(`portal_mech_chassis_${mechItem.mech.chassis}`);
+		
+		lineFactorKeys.forEach(function(f, i){
+			if(f == 'rr') return;
+			this.factors[f].val = mechItem.factors[f].val
+		}, this);
+		//this.factors.applyValues();
+		
+		this.wep.textContent = weapons.join(' | ');
+		this.equip.textContent = equips.join(' | ');
+		
+		// TODO: add delete event listeners??
+	};
+	calc(){
+		if(this.mechItem === null) return;
+		
+		lineFactorKeys.forEach(function(f, i){
+			if(f == 'rr') return;
+			this.factors[f].val = this.mechItem.factors[f].val
+		}, this);
+		this.factors.applyValues();
+	}
+}
+
 export class MechLine {
 	constructor(mech, i, truncate, deletable=true, removeCallback){
 		
@@ -1065,7 +1801,7 @@ export class MechLine {
 		
 		// Vanilla
 		let line = document.createElement('div');
-		line.className = `mcLn line smaller ${this.mech.size} ${this.mech.chassis} ${(this.mech.infernal && global.blood['prepared'] == 3)? 'infernal' : ''}`;
+		line.className = `mcLn line ${this.mech.size} ${this.mech.chassis} ${(this.mech.infernal && global.blood['prepared'] == 3)? 'infernal' : ''}`;
 		
 		let title = document.createElement('div');
 		title.className = 'title';

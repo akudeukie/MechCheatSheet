@@ -1,4 +1,4 @@
-import { app, initData, saveConfig } from './app.js';
+import { app, initData, saveConfig, debounce } from './app.js';
 
 import { global, setGlobal } from '../evolve/src/vars.js';
 import { statusEffect, monsters } from '../evolve/src/portal.js';
@@ -363,7 +363,7 @@ function populateMenus(){
 		$(el).val(app.config[el.dataset.field]);
 	});
 	
-	$('#avgPrecise, #avgEdenTax').each((i, el)=>{
+	$('#avgPrecise, #avgEdenTax, #virtualList').each((i, el)=>{
 		$(el).prop('checked', app.config[el.dataset.field]);
 	});
 	
@@ -495,7 +495,14 @@ function pickLocale(e){
 	global.settings.locale = e.currentTarget.dataset.val;
 	//$('#localeButton').text(e.data.locale);
 	saveConfig();
-	window.location.reload();
+	window.location.reload()
+}
+
+function pickVirtual(e){
+	if(!e.currentTarget.dataset.field) return;
+	
+	onFormInput(e);
+	window.location.reload();;
 }
 
 /*** 
@@ -583,6 +590,7 @@ function onFormInput(e){
 				break;
 			case 'avgEdenTax':
 			case 'preciseMedians':
+			case 'virtualList':
 				app.config[e.currentTarget.dataset['field']] = (e.currentTarget.checked)? true : false;
 				saveConfig();
 				break;
@@ -738,6 +746,7 @@ function initEvents() {
 	
 	$('#avgStart, #avgLength, #avgRepeats, #avgThreads').on('input', onFormInput);
 	$('#avgPrecise, #avgEdenTax').on('change', onFormInput);
+	$('#virtualList').on('change', pickVirtual);
 	$('#avgSimForm').on('submit', submitCalculatorForm);
 	
 	mechConstructor.callbacks.saveMech = addMech;
@@ -745,15 +754,16 @@ function initEvents() {
 	goTopButton = $('#goToTop').on('click', (e)=>{
 		window.scroll({top: 0, behavior: 'instant'});
 		//console.log(usedLoc);
-	});
+	}).get(0);
 	//goTopButton.hide();
 	//goTopThreshold = 10 * parseFloat(getComputedStyle(document.documentElement).fontSize);
-	$(window).on('scroll', (e)=>{
-		if (document.body.scrollTop < goTopThreshold && document.documentElement.scrollTop < goTopThreshold)
-			goTopButton.hide();
-		else
-			goTopButton.show();
-	});
+	$(window).on('scroll', debounce((e)=>{
+		//if (document.body.scrollTop < goTopThreshold && document.documentElement.scrollTop < goTopThreshold)
+		if (window.scrollY < goTopThreshold)
+			goTopButton.style = null;
+		else if(goTopButton.style.length == 0)
+			goTopButton.style = 'display: block';
+	}, 100));
 }
 
 const visual = {
