@@ -721,6 +721,7 @@ function buildStatusEquipDeltaTable(){
 				//break;
 			case 'windy':
 			case 'hilly':
+			case 'mountain':
 			case 'river':
 			case 'tar':
 			case 'flooded':
