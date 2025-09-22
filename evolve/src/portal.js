@@ -1508,7 +1508,7 @@ export function statusEffect(mech, effect) {
       break;
     case "radioactive":
       {
-        if (!mech.equip.includes("shields") && mech.equip.includes("manashield")) {
+        if (!mech.equip.includes("shields") && !mech.equip.includes("manashield")) {
           rating = 0.5;
         }
       }
@@ -1599,11 +1599,13 @@ export function statusEffect(mech, effect) {
             break;
           case "cyberdemon":
             rating = 0.5;
+            break;
           case "large":
             rating = 0.45;
             break;
           case "archfiend":
             rating = 0.35;
+            break;
           case "titan":
             rating = 0.25;
             break;
@@ -1618,7 +1620,7 @@ export function statusEffect(mech, effect) {
       break;
   }
   if (mech.equip.includes("lucky")) {
-    rating += 0.01 * Math.floor(seededRandom(1, 10, false, global.stats.resets + (global.portal?.spire?.count || 1) * 42));
+    rating += 0.01 * Math.floor(seededRandom(1, 10, false, global.stats.reset + (global.portal?.spire?.count || 1) * 42));
     if (rating > 1) {
       rating = 1;
     }

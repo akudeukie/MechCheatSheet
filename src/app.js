@@ -6,14 +6,14 @@ import { sampleMechBay, oopsAllCollectors, rainbowMechBay } from './samplemechs.
 export const numFormat = new Intl.NumberFormat(undefined);
 
 export const app = {
-	version: '1.0.2',
+	version: '1.0.3',
 	LS_SString: 'storedSaveString',
 	LS_Config: 'storedConfig',
 	LS_MechList: 'favMechs',
 	LS_MechBucket: 'mechBucket_',
 	LS_PageLabels: 'storedLabels',
 	LS_Heap: 'storedRandomStuff',
-	info: ['Mech Cheat Sheet', 'by Akudeu Kie', 'https://github.com/akudeukie/MechCheatSheet/', 'for %0 v%1 %2', 'https://pmotschmann.github.io/Evolve/', 'Evolve Incremental', '1.4.8', 'by Demagorddon'],
+	info: ['Mech Cheat Sheet', 'by Akudeu Kie', 'https://github.com/akudeukie/MechCheatSheet/', 'for %0 v%1 %2', 'https://pmotschmann.github.io/Evolve/', 'Evolve Incremental', global.version, 'by Demagorddon'],
 	maxMechBuckets: 4,
 	maxStatus: 4,
 	maxMechPages: 15,

@@ -852,6 +852,7 @@ var goTopThreshold = 160;
 	
 	console.log(global);
 	$('html').attr('lang', app.config.locale);
+	$('#gameVersion').text('v' + app.info[6]);
 	$('#prepared').val(global.blood.prepared);
 	$('#wrathlvl').val(global.blood.wrath);
 	$('#gladiatorlvl').val(global.stats.achieve.gladiator.l);

@@ -64,7 +64,7 @@ export function setGlobal(gameState) {
 if (!global["version"]) {
   global["version"] = "0.2.0";
 }
-global["version"] = "1.4.8";
+global["version"] = "1.4.9";
 delete global["revision"];
 delete global["beta"];
 if (!global["settings"]) {

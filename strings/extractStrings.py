@@ -48,7 +48,7 @@ with open('used_strings.json', encoding='utf-8', newline='\n') as used_file, \
 	
 	for locale in locales:
 		with open('default/strings{}.json'.format(locale), 'r+', encoding='utf-8', newline='\n') as loc_file, \
-			open('strings{}.json'.format(locale), 'r+', encoding='utf-8', newline='\n') as destination_file:#, \
+			open('strings{}.json'.format(locale), 'w+', encoding='utf-8', newline='\n') as destination_file:#, \
 			
 			try:
 				locale_strings = json.load(loc_file)
