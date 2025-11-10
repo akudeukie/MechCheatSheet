@@ -70,6 +70,7 @@ export const mechConstructor = {
 								el.dataset.delta = e.target.dataset.delta;
 							else
 								delete el.dataset.delta;
+							mechConstructor.drawTypeSelector();
 							mechConstructor.calc();
 						}
 					});
@@ -122,48 +123,7 @@ export const mechConstructor = {
 		}
 		sizeButton.val(selectedSize).text(loc(`portal_mech_size_${selectedSize}`));
 		
-		let typeButton = $('#cMechChassis');
-		let typeSelector = $(typeButton.next('.dropdownContent').get(0)).empty();
-		let typeList = validChassisTypes(mechConstructor.mech);
-		
-		oHtml = '';
-		mechConstructor.dummy.size = mechConstructor.mech.size;
-		typeList.forEach(function(val, i){
-			mechConstructor.dummy.chassis = val;
-			let tFactor = (global.portal?.spire?.type)? terrainEffect(mechConstructor.dummy) : 0;
-			let tFactorString = (global.portal?.spire?.type)? `<span class="${chassisRatingClasses[Math.floor(Math.min(tFactor, 1.0) * (chassisRatingClasses.length-1))]}">[${(tFactor * 100).toFixed(0)}%]</span>` : '';
-			let effectDelta = 0;
-			if(global.portal?.spire?.status){
-				Object.keys(global.portal.spire.status).forEach(function(effect){
-					if(mechConstructor.statusTable[effect]['chassis'][val]){
-						effectDelta += mechConstructor.statusTable[effect]['chassis'][val];
-					}
-				});
-			}
-			oHtml += `<a data-val="${val}" ${(effectDelta != 0)? `data-delta="${effectDelta}" class="${(effectDelta > 0)? 'notreally ' : ''}recommended strength-1"` : ''}"><span>${loc(`portal_mech_chassis_${val}`)}</span> ${tFactorString}</a>`;
-		});
-		typeSelector.append($(oHtml).on('click',  (e)=>{ 
-			mechConstructor.setType(e.currentTarget.dataset.val); 
-			mechConstructor.draw(); 
-			app.config.defaultMType = mechConstructor.mech.chassis;
-			saveConfig();
-			highlightHazards(); 
-			highlightTarget(); 
-		}));
-		typeSelector.children('a[data-delta]').on('mouseenter', {'chassis': true}, highlightHazards).on('mouseleave', {'not': true}, highlightHazards);
-		
-		if(!typeList.includes(mechConstructor.mech.chassis))
-			mechConstructor.setType(typeList[0]);
-		else
-			mechConstructor.setType(mechConstructor.mech.chassis);
-			
-			
-		let selectedType = mechConstructor.mech.chassis;
-		if(typeList.includes(typeButton.val())){
-			selectedType = typeButton.val();
-			mechConstructor.mech.chassis = selectedType;
-		}
-		typeButton.val(selectedType).text(loc(`portal_mech_chassis_${selectedType}`));
+		mechConstructor.drawTypeSelector();
 		
 		$('.cMechWeapon').each((i, el)=>{
 			let $el = $(el);
@@ -255,6 +215,54 @@ export const mechConstructor = {
 				
 		mechConstructor.calc();
 		
+	},
+	
+	drawTypeSelector(){
+		let typeButton = $('#cMechChassis');
+		let typeSelector = $(typeButton.next('.dropdownContent').get(0)).empty();
+		let typeList = validChassisTypes(mechConstructor.mech);
+		
+		let oHtml = '';
+		mechConstructor.dummy.size = mechConstructor.mech.size;
+		typeList.forEach(function(val, i){
+			mechConstructor.dummy.chassis = val;
+			mechConstructor.dummy.equip = [];
+			let tFactor = (global.portal?.spire?.type)? terrainEffect(mechConstructor.dummy) : 0;
+			mechConstructor.dummy.equip = mechConstructor.mech.equip;
+			let tFactorFull = (global.portal?.spire?.type)? doTheTerrainFactorThing(mechConstructor.dummy) : 0;
+			let tFactorString = (global.portal?.spire?.type)? `<span class="${chassisRatingClasses[Math.floor(Math.min(tFactor, 1.0) * (chassisRatingClasses.length-1))]}">[${(tFactor * 100).toFixed(0)}%]</span> <span class="unimport">[${(tFactorFull * 100).toFixed(0)}%]</span>` : '';
+			let effectDelta = 0;
+			if(global.portal?.spire?.status){
+				Object.keys(global.portal.spire.status).forEach(function(effect){
+					if(mechConstructor.statusTable[effect]['chassis'][val]){
+						effectDelta += mechConstructor.statusTable[effect]['chassis'][val];
+					}
+				});
+			}
+			oHtml += `<a data-val="${val}" ${(effectDelta != 0)? `data-delta="${effectDelta}" class="${(effectDelta > 0)? 'notreally ' : ''}recommended strength-1"` : ''}"><span>${loc(`portal_mech_chassis_${val}`)}</span> ${tFactorString}</a>`;
+		});
+		typeSelector.append($(oHtml).on('click',  (e)=>{ 
+			mechConstructor.setType(e.currentTarget.dataset.val); 
+			mechConstructor.draw(); 
+			app.config.defaultMType = mechConstructor.mech.chassis;
+			saveConfig();
+			highlightHazards(); 
+			highlightTarget(); 
+		}));
+		typeSelector.children('a[data-delta]').on('mouseenter', {'chassis': true}, highlightHazards).on('mouseleave', {'not': true}, highlightHazards);
+		
+		if(!typeList.includes(mechConstructor.mech.chassis))
+			mechConstructor.setType(typeList[0]);
+		else
+			mechConstructor.setType(mechConstructor.mech.chassis);
+			
+			
+		let selectedType = mechConstructor.mech.chassis;
+		if(typeList.includes(typeButton.val())){
+			selectedType = typeButton.val();
+			mechConstructor.mech.chassis = selectedType;
+		}
+		typeButton.val(selectedType).text(loc(`portal_mech_chassis_${selectedType}`));
 	},
 	
 	drawBasicTable(){

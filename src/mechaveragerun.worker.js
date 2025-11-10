@@ -1,7 +1,7 @@
 import { global, setGlobal } from '../evolve/src/vars.js';
-import { genSpireFloor, mechRating } from '../evolve/src/portal.js';
+import { genSpireFloor, mechRating, bossResists } from '../evolve/src/portal.js';
 
-import { getMedianFromArray, Datum, Floorum, sortNumbers } from './data.js'
+import { getMedianFromArray, Datum, Floorum, sortNumbers, evolve } from './data.js'
 import { doTheWeaponFactorThing, doTheTerrainFactorThing } from './mechfactors.js'
 
 onmessage = (e) => {
@@ -37,6 +37,8 @@ var startFloor = 1;
 var runs = 0;
 var TOTAL_CALCS = 0;
 var precise = false;
+
+var floorGenStats = { 'terrain': {}, 'boss': {}, 'hazard': {}, 'weapon': {}, 'chassis': {} };
 
 function startWork(data){
 	clearTimeout(runTimer);
@@ -86,6 +88,9 @@ function startWork(data){
 		
 		progressFreq = Math.min(Math.max(Math.round(MAX_RUNS / 100), 1), 15);
 		runs = 0;
+		
+		floorGenStats = { 'terrain': {}, 'boss': {}, 'hazard': {}, 'weapon': {}, 'chassis': {} };
+		
 		runTimer = setTimeout(runSomething, 200 + data.wId * 3);
 		//postMessage(`>> W${wId}: Starting run with ${global.portal.mechbay.mechs.length} mechs${(combatMechs != global.portal.mechbay.mechs.length)? ` [${combatMechs} combat ready]` : ``}${(taxed > 0)? ` [${taxed} stuck in Eden]` : ``}. ${data['start']}->${(parseInt(data['start']) + parseInt(data['length']))} x ${data['repeats']} // ${progressFreq}`);
 	}
@@ -123,6 +128,16 @@ function runSomething(){
 	for(var i = 0; (iterationChunk * CHUNK_SIZE + i) < MAX_RUNS; i++){
 		global.portal.spire.status = {}
 		genSpireFloor();
+		
+		floorGenStats.terrain[global.portal.spire.type] = ++floorGenStats.terrain[global.portal.spire.type] || 1;
+		floorGenStats.boss[global.portal.spire.boss] = ++floorGenStats.boss[global.portal.spire.boss] || 1;
+		for(var floorHazard in global.portal.spire.status) {
+			floorGenStats.hazard[floorHazard] = ++floorGenStats.hazard[floorHazard] || 1;
+		}
+		let weakTo = bossResists(global.portal.spire.boss)['w'];
+		if(weakTo !== 'none')
+			floorGenStats.weapon[weakTo] = ++floorGenStats.weapon[weakTo] || 1;
+		
 		let mavg = 0;
 		let combatMechs = 0;
 		let rating = 0;
@@ -175,6 +190,7 @@ function runSomething(){
 		timeData.length = 0;
 		
 		STOP_NOW = false;
+		postMessage({'a':'stats', 'stats': floorGenStats});
 		postMessage({'a':'done', 'w': wId});
 		return;
 	}
@@ -226,6 +242,7 @@ function runSomething(){
 	
 	if((global.portal.spire.count - startFloor) >= FLOOR_LENGTH) {
 		// Done!
+		postMessage({'a':'stats', 'stats': floorGenStats});
 		postMessage({'a':'progress', 'w': wId, 'progress': 1});
 		postMessage({'a':'done', 'w': wId});
 		isRunning = false;

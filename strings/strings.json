@@ -191,6 +191,7 @@
   "mcs_con_tefactor_par3_a": "Equipment choices marked with",
   "mcs_con_tefactor_par3_b": "blue diamond",
   "mcs_con_tefactor_par3_c": "help counteract currently present hazards.",
+  "mcs_con_tefactor_par4": "Type selector displays effectiveness value (in gray) with hazards and equipment taken into account.",
   "mcs_con_wefactor": "Weapon effectiveness",
   "mcs_con_wefactor_par1": "How effective selected weapons are against current boss.",
   "mcs_con_wefactor_par2": "Some weapons might be affected by randomness, depending on the floor number and other factors. For better accuracy don't forget to import your current save.",

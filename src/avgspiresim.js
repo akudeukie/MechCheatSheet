@@ -1,13 +1,15 @@
 import { app, initData, saveConfig, getMechList, saveMechList, numFormat } from './app.js';
 
 import { global } from '../evolve/src/vars.js';
-import { mechRating, mechSize } from '../evolve/src/portal.js';
+import { mechRating, mechSize, monsters } from '../evolve/src/portal.js';
 import { loc } from '../evolve/src/locale.js';
 import { timeFormat } from '../evolve/src/functions.js';
 
-import { Datum, Floorum, getMedianFromArray, lerp, invlerp, sortNumbers, shrinkMedianArray } from './data.js';
+import { Datum, Floorum, getMedianFromArray, lerp, invlerp, sortNumbers, shrinkMedianArray, evolve } from './data.js';
 import { inform, isSpireSetup, importFloorum } from './mechcheatsheet.js';
+import { mechConstructor } from './mechconstructor.js';
 import { mechPager } from './mechpager.js';
+import { getStrongChassis } from './mechfactors.js';
 
 //import * as test from './mechaveragerun.worker.js';
 
@@ -228,6 +230,9 @@ export const avgCalc = {
 				}
 				
 				avgCalc.avgResults++;
+				break;
+			case 'stats':
+				avgCalc.sims[avgCalc.runningSim].addStats(e.data['stats']);
 				break;
 			case 'progress':
 				avgCalc.workers[e.data.w]['progress'] = e.data.progress;
@@ -632,6 +637,17 @@ class AverageSim {
 		
 		this.totals = {'n': 0, 'e': new Datum(), 't': new Datum(), 'slowest': { 'e': new Floorum(), 't': new Floorum() }};
 		this.time = {'gathering': 0, 'finalizing': 0};
+		
+		this.stats = {'terrain': {}, 'boss': {}, 'hazard': {}, 'weapon': {}, 'chassis': {}, 'weapon_avg': {}};
+		Object.keys(monsters).forEach(function(boss){
+			this.stats.boss[boss] = 0;
+		}, this);
+		for(var terrain of evolve.spire.terrain){
+			this.stats.terrain[terrain] = 0;
+		}
+		for(var hazard of evolve.spire.hazards){
+			this.stats.hazard[hazard] = 0;
+		}
 	}
 	init(start, length, repeats, label, descriptor, precise) {
 		this.start = start;
@@ -676,6 +692,12 @@ class AverageSim {
 		this.totals.slowest.t = new Floorum();
 		this.time.gathering = 0;
 		this.time.finalizing = 0;
+		
+		for(var domain in this.stats) {
+			for(var key in this.stats[domain]) {
+				this.stats[domain][key] = 0;
+			}
+		}
 	}
 	addData(floor, effData, timeData, slowestData, raw = null) {
 		floor -= this.start;
@@ -731,6 +753,20 @@ class AverageSim {
 		else if(this.bounds.t.max < getMedianFromArray( this.buckets.t[floor].med ))
 			this.bounds.t.max = getMedianFromArray( this.buckets.t[floor].med );
 		
+	}
+	addStats(stats) {
+		for(var terrain in stats.terrain) {
+			this.stats.terrain[terrain] = (this.stats.terrain[terrain] + stats.terrain[terrain]) || stats.terrain[terrain];
+		}
+		for(var boss in stats.boss) {
+			this.stats.boss[boss] = (this.stats.boss[boss] + stats.boss[boss]) || stats.boss[boss];
+		}
+		for(var hazard in stats.hazard) {
+			this.stats.hazard[hazard] = (this.stats.hazard[hazard] + stats.hazard[hazard]) || stats.hazard[hazard];
+		}
+		for(var weapon in stats.weapon) {
+			this.stats.weapon[weapon] = (this.stats.weapon[weapon] + stats.weapon[weapon]) || stats.weapon[weapon];
+		}
 	}
 	finalizeResults() {
 		let timeNow = performance.now();
@@ -788,6 +824,37 @@ class AverageSim {
 		this.normals = {
 			'e': avgCalc.canvas.e.b, 't': avgCalc.canvas.t.b,
 			'emed': avgCalc.canvas.emed.b, 'tmed': avgCalc.canvas.tmed.b,
+		}
+		
+		// Process, finalize & summarize floor statistics
+		for(var hazard in this.stats.hazard){
+			let chassisInHazard = Object.entries( mechConstructor.statusTable[hazard]['chassis'] );
+			if(chassisInHazard.length > 0){
+				let strongChassis = 0;
+				for(var i = 1; i < chassisInHazard.length; i++){
+					if(!global.race['warlord'] && evolve.mech.type.standard.includes( chassisInHazard[i][0] ) === false)
+						continue;
+					if(chassisInHazard[i][1] < chassisInHazard[strongChassis][1])
+						strongChassis = i;
+				}
+				// if(global.race['warlord'] || evolve.mech.type.standard.includes( chassisInHazard[strongChassis][0] ) === true)
+					// this.stats.chassis[chassisInHazard[strongChassis][0]+'H'] = (this.stats.chassis[chassisInHazard[strongChassis][0]+'H'] + this.stats.hazard[hazard]) || this.stats.hazard[hazard];
+			}
+		}
+		for(var terrain in this.stats.terrain){
+			let strongestCh = getStrongChassis(terrain, global.race['warlord'] ? evolve.mech.type.minion.concat( evolve.mech.type.fiend ).concat( evolve.mech.type.cyberdemon ).concat( evolve.mech.type.archfiend ) : evolve.mech.type.standard);
+			if(strongestCh !== 'none')
+				this.stats.chassis[strongestCh] = (this.stats.chassis[strongestCh] + this.stats.terrain[terrain]) || this.stats.terrain[terrain];
+		}
+		let totalCount = 0;
+		for(var boss in this.stats.boss){
+			// (effData.avg + this.buckets.n[floor] * this.buckets.e[floor].avg)/(this.buckets.n[floor] + 1)
+			Object.keys(monsters[boss].weapon).forEach(function(weapon){
+				if(global.race["warlord"] || evolve.mech.weapon.standard.includes(weapon)){
+					this.stats.weapon_avg[weapon] = (( monsters[boss].weapon[weapon] * this.stats.boss[boss] + this.stats.weapon_avg[weapon] * totalCount ) / ( totalCount + this.stats.boss[boss] )) || monsters[boss].weapon[weapon];
+				}
+			}, this);
+			totalCount += this.stats.boss[boss];
 		}
 		
 		this.time.finalizing = performance.now() - timeNow;

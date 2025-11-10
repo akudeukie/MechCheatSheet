@@ -687,6 +687,7 @@ function initEvents() {
 		
 		global.portal.mechbay.scouts = parseInt($('#scouts').val());
 		saveConfig();
+		mechConstructor.draw();
 		updateMechCalcs();
 	});
 	$('#resets').on('input', (e)=>{
