@@ -1230,7 +1230,7 @@ export function mechCost(size, infernal, standardize) {
   }
   return { s: soul, c: cost };
 }
-function bossResists(boss) {
+export function bossResists(boss) {
   let weak = `laser`;
   let resist = `laser`;
   let standardList = ["laser", "flame", "plasma", "kinetic", "missile", "sonic", "shotgun", "tesla"];

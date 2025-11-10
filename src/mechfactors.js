@@ -2,7 +2,7 @@ import { global } from '../evolve/src/vars.js';
 import { statusEffect, terrainEffect, terrainRating, checkBossResist, weaponPower, mechRating, mechSize } from '../evolve/src/portal.js';
 
 export function doTheTerrainFactorThing(mech){
-	if(!global || !global.portal?.spire || global.portal?.spire.boss == '') return 0;
+	if(!global || !global.portal?.spire || global.portal?.spire.type == '') return 0;
 	
 	let rating = 1;
 	let terrainFactor = terrainEffect(mech);
@@ -42,6 +42,35 @@ export function doTheFullRatingThing(mech, boss, adjust){
 	}
 	
 	return mechRating(mech, boss) * global.portal.spire.count * adjustValue;
+}
+
+export function getStrongChassis(terrain, types){
+	let mech = {
+		size: 'small',
+		hardpoint: ['laser'],
+		chassis: '',
+		equip: [],
+		infernal: false
+	}
+	
+	let strongest = mech.chassis;
+	let sRating = 0;
+	let foundDelta = false;
+	
+	for(var chassis of types){
+		mech.chassis = chassis;
+		let iRating = terrainEffect(mech, terrain)
+		if(iRating > sRating){
+			strongest = chassis;
+			sRating = iRating;
+			foundDelta = true;
+		}
+	}
+	
+	if(foundDelta)
+		return strongest;
+	else
+		return 'none';
 }
 
 export function adjustRawRating(mech, rating){

@@ -87,5 +87,9 @@ export const evolve = {
 			standard:		['special','shields','sonar','grapple','infrared','flare','radiator','coolant','ablative','stabilizer','seals'],
 			warlord:		['scavenger','scouter','darkvision','echo','thermal','manashield','cold','heat','athletic','lucky','stoneskin'],
 		},
+		weapon: {
+			standard:	["laser", "kinetic", "shotgun", "missile", "flame", "plasma", "sonic", "tesla"],
+			warlord:	["claws", "venom", "cold", "shock", "fire", "acid", "stone", "iron", "flesh", "ice", "magma", "axe", "hammer"],
+		},
 	},
 };
